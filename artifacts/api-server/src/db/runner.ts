@@ -70,6 +70,8 @@ export type RunOptions = {
   /** Per-file statement timeout inside the migration transaction (default 15 min; the pool default is 30 s). */
   statementTimeout?: string;
   lockTimeout?: string;
+  /** How long a second boot waits for the migration lock before failing (default 15 min). */
+  lockWaitMs?: number;
 };
 
 export const SCHEMA_MIGRATIONS_DDL = `CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -134,7 +136,16 @@ export async function runMigrationFiles(opts: RunOptions): Promise<RunResult> {
   };
   client.on?.("notice", onNotice);
   try {
-    await client.query(`SELECT pg_advisory_lock($1)`, [MIGRATION_LOCK_ID]);
+    // Poll with pg_try_advisory_lock instead of a blocking pg_advisory_lock: a session blocked inside that statement
+    // holds a virtual transaction, and a CREATE INDEX CONCURRENTLY run by the lock holder waits for every such
+    // transaction to end — the two boots deadlock (40P01; seen in CI). Between tries this session runs nothing.
+    const waitUntil = Date.now() + (opts.lockWaitMs ?? 15 * 60_000);
+    for (;;) {
+      const { rows } = await client.query(`SELECT pg_try_advisory_lock($1) AS ok`, [MIGRATION_LOCK_ID]);
+      if (rows[0]?.ok) break;
+      if (Date.now() > waitUntil) throw new MigrationError("timed out waiting for the migration lock (another instance is migrating)", null);
+      await new Promise((r) => setTimeout(r, 250));
+    }
     locked = true;
     await client.query(SCHEMA_MIGRATIONS_DDL);
 

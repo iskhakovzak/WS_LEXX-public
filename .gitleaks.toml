@@ -11,3 +11,10 @@ regexTarget = "match"
 regexes = [
   '''postgres(ql)?://postgres:postgres@(localhost|127\.0\.0\.1)(:\d+)?(/[A-Za-z0-9_]*)?''',
 ]
+
+[[allowlists]]
+description = "Browser storage key names (localStorage / sessionStorage), e.g. PREFS_KEY = \"ws_lexx_disc_prefs_v1\" — names, not secrets"
+regexTarget = "line"
+regexes = [
+  '''[A-Z][A-Z0-9_]*_KEY\s*=\s*["'][a-z][a-z0-9_.:-]*["']\s*;?\s*(//.*)?$''',
+]
