@@ -6,6 +6,7 @@
  *   morningMessage   premarket focus line + the day's own contract (or a nudge to set it) + «Открыть план» / «Мой день»
  *   eveningMessage   the day's card: own net P&L (private chat only), focus ✓/✗ with the cost, the trade to review,
  *                    «same ticker: N traders», contract verdict; buttons daily:rev:<date> / daily:dis:<date> + the day URL
+ *                    + one rewards line: today's new badge, else the kept-contract streak with the day's points
  *   contractAlert    intraday «daily stop reached» / «trade limit reached» (scheduled PropReports sync only)
  */
 import type { Lang } from "../../i18n";
@@ -111,6 +112,19 @@ function contractVerdictLine(lang: Lang, c: ContractVerdict | null, showMoney: b
   return items.length ? t("tg.contract.line", { items: items.join(" · ") }) : t("tg.evening.contractUnset");
 }
 
+/** One line: the badges earned today, else the kept-contract streak with the day's points (only on a kept day). */
+export function rewardsLine(lang: Lang, card: EveningCard): string | null {
+  const r = card.rewards;
+  if (!r) return null;
+  const t = dailyT.tFor(lang);
+  if (r.badges.length) {
+    const names = r.badges.map((b) => escHtml(dailyT.tryFor(lang, `badge.${b.id}`, { count: b.target }) ?? b.id));
+    return t("tg.evening.badge", { badges: names.join(", ") });
+  }
+  const points = card.contract?.disciplineDelta ?? 0;
+  return r.streak > 0 && points > 0 ? t("tg.evening.streak", { days: t("tg.evening.streakDays", { count: r.streak }), points: `+${points}` }) : null;
+}
+
 export type CardState = "open" | "reviewed" | "disputed";
 
 /**
@@ -156,6 +170,8 @@ export function eveningMessage(o: { lang: Lang; card: EveningCard; siteUrl: stri
 
   const c = contractVerdictLine(lang, card.contract, money);
   if (c) lines.push(c);
+  const rw = rewardsLine(lang, card);
+  if (rw) lines.push(rw);
 
   const dayBtn = [{ text: t("tg.button.day"), url: dailyLinks.day(siteUrl, card.date) }];
   if (state !== "open") {

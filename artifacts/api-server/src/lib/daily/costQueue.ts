@@ -5,7 +5,9 @@
  * trading days for items the curator has not looked at yet) every (trader, day) gets the reasons it cost money:
  *
  *   stop_breach  — loss beyond a limit: the day net past the daily loss limit (trader_risk_limits), or a breach alert
- *                  (risk_alert_log: used − limit for daily stop / weekly / drawdown).
+ *                  (risk_alert_log: used − limit for daily stop / weekly / drawdown). Weekly and drawdown breaches are
+ *                  states that last for days: they cost only the loss ADDED that day (owner decision 2026-10-18), so one
+ *                  old drawdown does not top the queue every day; a green day keeps the chip without $.
  *   focus_broken — the day's focus was broken (lib/daily/service eveningFor → FocusVerdict.costNet).
  *   disputed     — the trader pressed «not a mistake» on the focus hit: the curator should look (instead of focus_broken).
  *   fees         — fees ≥ 50 % of a positive gross (and ≥ $5): the commissions ate the profit; priced like the engine's
@@ -19,6 +21,8 @@
  * rows sort ascending (most negative first). The pure parts (reasons, sums, ranking, window) are exported for tests;
  * `buildCostQueue` loads the whole roster in one round of grouped queries; focus verdicts come from the stored evening
  * snapshots (daily_reviews.verdict), only missing ones go through service.eveningFor (time-boxed, rest in background).
+ * The $ / % thresholds above are the defaults: the fees / giveback ones and the carry window are desk settings
+ * (lib/settings registry: daily.fees*, daily.giveback*, curator.queueCarryDays), shared with the engine.
  * Money is NET (pnl − |fees|); dates are New York trading days.
  */
 import { pool } from "@workspace/db";
@@ -27,19 +31,20 @@ import { addDays, nyDate, nyMinutes } from "../tradingDate";
 import { violationDaySql } from "../violationWindow";
 import { prevTradingDay, tradingPhase } from "../curatorLogic";
 import { logger } from "../logger";
-import { FEES_HEALTHY_SHARE, FEES_MIN_USD, FEES_SHARE, GIVEBACK_CLOSE_SHARE, GIVEBACK_MIN_USD } from "./detectors";
+import { setting } from "../settings/registry";
+import { dayThresholds } from "./detectors";
 import type { CostQueueItem, EveningCard, FocusVerdict, TextItem } from "./types";
 
 export const COST_QUEUE = {
-  /** Trading days before D that stay in the queue while unresolved. */
-  carryDays: 2,
+  /** Trading days before D that stay in the queue while unresolved (desk setting curator.queueCarryDays). */
+  get carryDays(): number { return setting("curator.queueCarryDays"); },
   streakMin: 3,
   /** Daily aggregates loaded for the loss streak. */
   historyDays: 45,
   /** How long a request waits for verdicts missing from daily_reviews (the rest is computed in the background). */
   focusBudgetMs: 600,
   focusConcurrency: 6,
-} as const;
+};
 
 export type ReasonKind = CostQueueItem["reasons"][number]["kind"];
 export type CostReason = CostQueueItem["reasons"][number];
@@ -87,9 +92,12 @@ export function stopBreachReason(dayNet: number | null, dailyLimit: number | nul
     }
     options.push({ cost: r2(dayNet + dailyLimit), scope: "daily", used: r2(-dayNet), limit: dailyLimit, tradeId });
   }
+  const addedToday = dayNet != null && dayNet < 0 ? dayNet : null;
   for (const a of alerts) {
     const over = a.used != null && a.limit != null && a.used > a.limit ? r2(-(a.used - a.limit)) : null;
-    options.push({ cost: over, scope: a.kind === "stop" ? "daily" : a.kind, used: a.used, limit: a.limit });
+    const lasting = a.kind !== "stop";
+    const cost = !lasting || over == null ? over : addedToday == null ? null : r2(Math.max(over, addedToday));
+    options.push({ cost, scope: lasting ? a.kind : "daily", used: a.used, limit: a.limit });
   }
   if (!options.length) return null;
   const worst = options.reduce((m, o) => ((o.cost ?? 0) < (m.cost ?? 0) ? o : m));
@@ -105,8 +113,9 @@ export function stopBreachReason(dayNet: number | null, dailyLimit: number | nul
  * (what trading less would have saved), the same price as the engine's «day:fees». */
 export function feesReason(gross: number | null, fees: number): CostReason | null {
   const f = Math.abs(fees);
-  if (gross == null || gross <= 0 || f < FEES_MIN_USD || f < FEES_SHARE * gross) return null;
-  return { kind: "fees", costNet: r2(-(f - FEES_HEALTHY_SHARE * gross)), text: text("fees", { fees: r2(f), gross: r2(gross), pct: Math.round((f / gross) * 100) }) };
+  const k = dayThresholds();
+  if (gross == null || gross <= 0 || f < k.feesMinUsd || f < k.feesShare * gross) return null;
+  return { kind: "fees", costNet: r2(-(f - k.feesHealthyShare * gross)), text: text("fees", { fees: r2(f), gross: r2(gross), pct: Math.round((f / gross) * 100) }) };
 }
 
 /** Losing trading days in a row ending on `day` (days without trades are skipped). `days` = the trader's daily nets. */
@@ -146,7 +155,8 @@ export function giveback(trades: readonly DayTrade[]): { peak: number; close: nu
 
 export function givebackReason(trades: readonly DayTrade[]): CostReason | null {
   const g = giveback(trades);
-  if (g.peak < GIVEBACK_MIN_USD || g.close > g.peak * GIVEBACK_CLOSE_SHARE) return null;
+  const k = dayThresholds();
+  if (g.peak < k.givebackMinUsd || g.close > g.peak * k.givebackKeepShare) return null;
   return {
     kind: "giveback",
     costNet: r2(g.close - g.peak),

@@ -1,13 +1,15 @@
 import * as React from "react";
-import { Crosshair, RefreshCw } from "lucide-react";
+import { Award, Crosshair, Flame, RefreshCw } from "lucide-react";
 import { Panel, Pill, type Tone } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { fmtDate, fmtUsd } from "@/lib/format";
+import { fmtDate, fmtNum, fmtUsd } from "@/lib/format";
 import { PICKABLE_MISTAKES, mistakeLabel } from "@/components/shared/mistake-labels";
+import { BADGE_ICON, badgeName, levelName, sortBadges } from "@/components/shared/badges";
+import { dailyI18n } from "@/i18n/ns/daily";
 import type { MistakeId, VerdictStatus } from "@/lib/daily/types";
 import { curatorI18n } from "@/i18n/ns/curator";
 import { commonI18n } from "@/i18n/ns/common";
@@ -42,10 +44,44 @@ export function FocusPanel({ trader, focus }: { trader: string; focus: CuratorFo
             <p className="text-sm text-muted-foreground">{cur?.source === "none" ? t("focus.none") : t("focus.notReady")}</p>
           )}
         </div>
+        {focus.rewards && <DisciplineLine rewards={focus.rewards} />}
         <FocusHistory focus={focus} />
       </div>
       <ReplaceFocusDialog open={open} onOpenChange={setOpen} trader={trader} focus={focus} />
     </Panel>
+  );
+}
+
+/** The trader's contract streak, discipline level / points and earned badges — one line (api lib/daily/rewards). */
+function DisciplineLine({ rewards }: { rewards: NonNullable<CuratorFocus["rewards"]> }) {
+  const { t } = dailyI18n.useT();
+  const d = rewards.discipline;
+  const earned = sortBadges(rewards.badges).filter((b) => b.earnedOn);
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+      <span className="micro-label">{t("rewards.curatorLine")}</span>
+      <span className="inline-flex items-center gap-1 tabular-nums" title={d.streak > 0 ? t("rewards.streak", { days: t("rewards.streakDays", { count: d.streak }) }) : t("rewards.streakNone")}>
+        <Flame className={cn("h-4 w-4", d.streak > 0 ? "text-warn" : "text-muted-foreground")} aria-hidden="true" />
+        {d.streak}
+      </span>
+      <span className="font-medium text-foreground">{levelName(d.level)}</span>
+      <span className="tabular-nums text-muted-foreground">
+        {t("rewards.points", { points: d.pointsTotal })} · {t("rewards.window", { days: d.windowDays, points: fmtNum(d.points30, { signed: true, decimals: 0 }) })}
+      </span>
+      {earned.length > 0 && (
+        <span className="inline-flex flex-wrap items-center gap-1" aria-label={t("rewards.badgesAria")}>
+          {earned.map((b) => {
+            const Icon = BADGE_ICON[b.id] ?? Award;
+            const label = `${badgeName(b)} — ${t("rewards.earnedOn", { date: fmtDate(b.earnedOn!, "dayMonth") })}`;
+            return (
+              <span key={b.id} role="img" aria-label={label} title={label} className="grid h-6 w-6 place-items-center rounded-md bg-primary/15 text-primary">
+                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+            );
+          })}
+        </span>
+      )}
+    </div>
   );
 }
 

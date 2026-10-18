@@ -1,12 +1,15 @@
 /**
  * «Деск на тикере» — one ticker-day with every desk trader's entries, adds, partial exits, exits and stops on one chart.
- * Route: /desk-day?ticker=XXX&date=YYYY-MM-DD (links.deskDay). Entry points: the trade sheet, the day report, the evening card.
- * Data: GET /api/desk-day/:ticker/:date (money only for the viewer's own trades; staff all) + the candle archive day.
+ * Route: /desk-day?ticker=XXX&date=YYYY-MM-DD[&alias=N] (links.deskDay). `alias` highlights that trader (the day alias
+ * from the top of the day); otherwise the viewer's own trades. Entry points: the trade sheet, the day report, the evening
+ * card, the top of the day.
+ * Data: GET /api/desk-day/:ticker/:date (names / $ per the view: staff, anonymous, named) + the candle archive day.
+ * «Позиция офиса»: the desk's net position layer on the chart + one summary line (toggle remembered per browser).
  */
 import * as React from "react";
 import { useLocation, useSearch } from "wouter";
 import { Lock, Search, Users } from "lucide-react";
-import { EmptyState, Page, PageHeader, Panel } from "@/components/ds";
+import { EmptyState, Page, PageHeader, Panel, usePersistentState } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,16 +23,17 @@ import { useDayCandles, useDeskDay, type DeskDay } from "@/components/desk-day/a
 import { DeskDayChart } from "@/components/desk-day/DeskDayChart";
 import { DeskDayLegend, RoleKey } from "@/components/desk-day/DeskDayLegend";
 import { clampEmptyWicks, defaultFocus, pickTakeaways, traderColors } from "@/components/desk-day/model";
-import { takeawayText } from "@/components/desk-day/labels";
+import { officeSummary, takeawayText, traderLabel } from "@/components/desk-day/labels";
 
 const TICKER_RE = /^[A-Z][A-Z0-9.-]{0,10}$/;
 const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-function readParams(search: string): { ticker: string; date: string } {
+function readParams(search: string): { ticker: string; date: string; alias: number | null } {
   const p = new URLSearchParams(search);
   const ticker = (p.get("ticker") ?? "").trim().toUpperCase();
   const date = p.get("date") ?? "";
-  return { ticker: TICKER_RE.test(ticker) ? ticker : "", date: YMD_RE.test(date) ? date : "" };
+  const alias = Number(p.get("alias"));
+  return { ticker: TICKER_RE.test(ticker) ? ticker : "", date: YMD_RE.test(date) ? date : "", alias: Number.isInteger(alias) && alias > 0 ? alias : null };
 }
 
 function PickForm({ ticker, date, onGo }: { ticker: string; date: string; onGo: (ticker: string, date: string) => void }) {
@@ -51,18 +55,21 @@ function PickForm({ ticker, date, onGo }: { ticker: string; date: string; onGo: 
   );
 }
 
-function DayView({ day, ticker, date }: { day: DeskDay; ticker: string; date: string }) {
+function DayView({ day, ticker, date, alias }: { day: DeskDay; ticker: string; date: string; alias: number | null }) {
   const { t } = deskDayI18n.useT();
   const candles = useDayCandles(ticker, date, day.traders.length > 0);
   const colors = React.useMemo(() => traderColors(day.traders), [day.traders]);
-  const [focus, setFocus] = React.useState<string[]>(() => defaultFocus(day));
-  const key = `${ticker}|${date}`;
+  const [focus, setFocus] = React.useState<string[]>(() => defaultFocus(day, alias));
+  const key = `${ticker}|${date}|${alias ?? ""}`;
   const lastKey = React.useRef(key);
   React.useEffect(() => {
-    if (lastKey.current !== key) { lastKey.current = key; setFocus(defaultFocus(day)); }
-  }, [key, day]);
+    if (lastKey.current !== key) { lastKey.current = key; setFocus(defaultFocus(day, alias)); }
+  }, [key, day, alias]);
   const toggle = React.useCallback((name: string) => setFocus((f) => (f.includes(name) ? f.filter((x) => x !== name) : [...f, name])), []);
-  const lines = pickTakeaways(day.takeaways).map(takeawayText);
+  const [showOfficeRaw, setShowOffice] = usePersistentState<boolean>("deskDay.office", true);
+  const showOffice = showOfficeRaw !== false;
+  const lines = pickTakeaways(day.takeaways).map((tk) => takeawayText(tk, (k) => traderLabel(day, k)));
+  const office = showOffice ? officeSummary(day) : null;
   const bars = React.useMemo(() => clampEmptyWicks(candles.data?.candles ?? []), [candles.data]);
   const baseSec = candles.data?.tf === "5m" ? 300 : candles.data?.tf === "15m" ? 900 : 60;
 
@@ -75,10 +82,16 @@ function DayView({ day, ticker, date }: { day: DeskDay; ticker: string; date: st
             {lines.join(" · ")}
           </p>
         )}
+        {office && (
+          <p className="text-sm text-foreground">
+            <span className="micro-label mr-2">{t("office.toggle")}</span>
+            {office}
+          </p>
+        )}
         {candles.isLoading ? (
           <Skeleton className="h-[340px] rounded-xl sm:h-[460px]" />
         ) : bars.length ? (
-          <DeskDayChart day={day} bars={bars} baseSec={baseSec} colors={colors} focus={focus} onToggle={toggle} />
+          <DeskDayChart day={day} bars={bars} baseSec={baseSec} colors={colors} focus={focus} onToggle={toggle} showOffice={showOffice} onShowOffice={setShowOffice} />
         ) : (
           <p className="py-10 text-center text-sm text-muted-foreground">{t("noCandles")}</p>
         )}
@@ -97,7 +110,7 @@ export default function DeskDayPage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const member = !!user && user.role !== "guest";
-  const { ticker, date } = React.useMemo(() => readParams(search), [search]);
+  const { ticker, date, alias } = React.useMemo(() => readParams(search), [search]);
   const q = useDeskDay(ticker, date, member);
   const go = React.useCallback((tk: string, d: string) => setLocation(links.deskDay(tk, d)), [setLocation]);
 
@@ -116,7 +129,7 @@ export default function DeskDayPage() {
   else if (q.isError) body = <Panel><QueryError error={q.error} onRetry={() => q.refetch()} /></Panel>;
   else if (!q.data) body = <Skeleton className="h-[480px] rounded-2xl" aria-label={t("loading")} />;
   else if (!q.data.traders.length) body = <Panel><EmptyState icon={Users} title={t("empty.title", { ticker })} description={t("empty.desc")} /></Panel>;
-  else body = <DayView day={q.data} ticker={ticker} date={date} />;
+  else body = <DayView day={q.data} ticker={ticker} date={date} alias={alias} />;
 
   return (
     <Page>

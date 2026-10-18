@@ -11,11 +11,10 @@ import { etDayKey, fmtEtDay, fmtEtTime, formatDuration, isoToEpoch } from "@/com
 import type { TradeRole } from "@/components/chart-engine/types";
 import { cn } from "@/lib/utils";
 import { fmtR, fmtUsd } from "@/lib/format";
-import { personName } from "@/i18n";
 import { deskDayI18n } from "@/i18n/ns/deskDay";
 import type { DayResult, DeskDay, DeskTrader } from "./api";
 import { drawDeskGlyph } from "./DeskFillsPrimitive";
-import { resultLabel, sideLabel } from "./labels";
+import { resultLabel, sideLabel, traderLabel } from "./labels";
 
 const RESULT_TONE: Record<DayResult, Tone> = { win: "up", loss: "down", be: "neutral", open: "accent" };
 
@@ -26,9 +25,10 @@ const et = (iso: string | null, day?: string) => {
   return day && etDayKey(e) !== day ? `${fmtEtDay(e)} ${fmtEtTime(e)}` : fmtEtTime(e);
 };
 
-function TraderRow({ tr, date, color, active, dimmed, onToggle }: { tr: DeskTrader; date: string; color: string; active: boolean; dimmed: boolean; onToggle: () => void }) {
+function TraderRow({ tr, day, color, active, dimmed, onToggle }: { tr: DeskTrader; day: DeskDay; color: string; active: boolean; dimmed: boolean; onToggle: () => void }) {
   const { t } = deskDayI18n.useT();
-  const name = personName(tr.name);
+  const name = traderLabel(day, tr.name);
+  const date = day.date;
   return (
     <li>
       <button
@@ -46,7 +46,7 @@ function TraderRow({ tr, date, color, active, dimmed, onToggle }: { tr: DeskTrad
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="truncate font-medium text-foreground">{name}</span>
-            {tr.me && <Pill tone="accent">{t("legend.me")}</Pill>}
+            {tr.me && day.view !== "anonymous" && <Pill tone="accent">{t("legend.me")}</Pill>}
             <span className="text-xs text-muted-foreground">{sideLabel(tr.side)}</span>
             <span className="text-xs text-muted-foreground">· {t("legend.trades", { count: tr.trades })}</span>
           </span>
@@ -125,7 +125,7 @@ export function DeskDayLegend({ day, colors, focus, onToggle, onClear }: {
           <TraderRow
             key={tr.name}
             tr={tr}
-            date={day.date}
+            day={day}
             color={colors.get(tr.name) ?? "#888"}
             active={focused.has(tr.name)}
             dimmed={focus.length > 0 && !focused.has(tr.name)}
@@ -133,6 +133,7 @@ export function DeskDayLegend({ day, colors, focus, onToggle, onClear }: {
           />
         ))}
       </ul>
+      {day.view === "anonymous" && <p className="px-2.5 text-2xs text-muted-foreground">{t("legend.anon")}</p>}
       {anyHidden && <p className="px-2.5 text-2xs text-muted-foreground">{t("legend.moneyHidden")}</p>}
     </div>
   );

@@ -16,7 +16,9 @@
  *   • gets an AbortSignal that fires at `timeoutMs`; the row is marked `timeout`, the lock is held until the run
  *     really settles, so a timed-out run can never overlap the next one.
  *
- * Schedules are 5-field cron on New York wall-clock time (jobs/cron.ts). The tick runs once per minute.
+ * Schedules are 5-field cron on New York wall-clock time (jobs/cron.ts). The tick runs once per minute. `cron` may be
+ * a getter (`() => "45 8 * * 1-5"`) for schedules an admin changes on the site (desk settings): it is read on every
+ * tick, re-parsed only when the string changes, and the admin jobs page shows the schedule in force.
  */
 import os from "node:os";
 import { pool } from "@workspace/db";
@@ -39,8 +41,8 @@ export type JobContext = {
 export type JobDef = {
   /** Stable id, also the i18n key suffix on the admin page (`jobs.names.<name>`): "propreports.sync". */
   name: string;
-  /** 5-field cron in America/New_York. Omit for event/manual-only jobs. */
-  cron?: string;
+  /** 5-field cron in America/New_York, or a getter read on every tick (desk settings). Omit for event/manual-only jobs. */
+  cron?: string | (() => string);
   /** Domain events that trigger a run (emitJobEvent). */
   on?: string[];
   /** Run once after start (delay in ms). */
@@ -52,7 +54,7 @@ export type JobDef = {
   run: (ctx: JobContext) => Promise<unknown>;
 };
 
-type Registered = JobDef & { expr: CronExpr | null };
+type Registered = JobDef & { parsed: { src: string; expr: CronExpr | null } | null };
 
 const jobs = new Map<string, Registered>();
 const inFlight = new Map<string, Promise<JobStatus>>();
@@ -71,7 +73,35 @@ export function setJobDeps(d: Partial<typeof deps>): void {
 export function registerJob(def: JobDef): void {
   if (!/^[a-z][a-z0-9_.-]*$/.test(def.name)) throw new Error(`job name "${def.name}" must be lower-case dotted`);
   if (jobs.has(def.name)) throw new Error(`job "${def.name}" registered twice`);
-  jobs.set(def.name, { ...def, expr: def.cron ? parseCron(def.cron) : null });
+  const job: Registered = { ...def, parsed: null };
+  if (typeof def.cron === "string") job.parsed = { src: def.cron, expr: parseCron(def.cron) }; // a bad literal fails here
+  jobs.set(def.name, job);
+}
+
+/** The schedule in force (a getter is read now); null = event/manual-only, or a getter that failed. */
+export function cronOf(j: JobDef): string | null {
+  if (typeof j.cron !== "function") return j.cron ?? null;
+  try {
+    return j.cron();
+  } catch (err) {
+    deps.logger.warn({ err, job: j.name }, "jobs: cron getter failed");
+    return null;
+  }
+}
+
+/** Parsed schedule in force; a getter's string is parsed only when it changed (an invalid one ⇒ not scheduled). */
+function exprOf(j: Registered): CronExpr | null {
+  const src = cronOf(j);
+  if (src == null) return null;
+  if (j.parsed?.src === src) return j.parsed.expr;
+  let expr: CronExpr | null = null;
+  try {
+    expr = parseCron(src);
+  } catch (err) {
+    deps.logger.error({ err, job: j.name, cron: src }, "jobs: invalid cron from the getter — not scheduled");
+  }
+  j.parsed = { src, expr };
+  return expr;
 }
 
 /** Tests only. */
@@ -221,8 +251,9 @@ function tick(): void {
   if (stopping) return;
   const now = new Date();
   for (const j of jobs.values()) {
-    if (!j.expr || !isEnabled(j)) continue;
-    if (cronMatches(j.expr, now)) void runJobNow(j.name, { trigger: "schedule" }).catch(() => undefined);
+    const expr = exprOf(j);
+    if (!expr || !isEnabled(j)) continue;
+    if (cronMatches(expr, now)) void runJobNow(j.name, { trigger: "schedule" }).catch(() => undefined);
   }
 }
 
@@ -251,7 +282,7 @@ export function startJobScheduler(): void {
   }
   scheduleNextTick();
   deps.logger.info(
-    { jobs: [...jobs.values()].map((j) => `${j.name}${j.cron ? ` [${j.cron}]` : ""}${isEnabled(j) ? "" : " (disabled)"}`) },
+    { jobs: [...jobs.values()].map((j) => `${j.name}${cronOf(j) ? ` [${cronOf(j)}]` : ""}${isEnabled(j) ? "" : " (disabled)"}`) },
     "jobs: scheduler started (cron in America/New_York)",
   );
 }
@@ -309,14 +340,15 @@ export async function jobsStatus(): Promise<JobStatusRow[]> {
     const l = lastBy.get(j.name);
     const s = statBy.get(j.name);
     const enabled = isEnabled(j);
+    const expr = exprOf(j);
     return {
       name: j.name,
-      cron: j.cron ?? null,
+      cron: cronOf(j),
       on: j.on ?? [],
       enabled,
       running: inFlight.has(j.name),
       timeoutMs: j.timeoutMs,
-      nextRunAt: enabled && j.expr ? iso(nextCronRun(j.expr, now)) : null,
+      nextRunAt: enabled && expr ? iso(nextCronRun(expr, now)) : null,
       last: l ? {
         id: Number(l.id), status: l.status, trigger: l.trigger, startedAt: iso(l.started_at)!, finishedAt: iso(l.finished_at),
         durationMs: l.duration_ms == null ? null : Number(l.duration_ms), error: l.error ?? null,

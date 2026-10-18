@@ -7,7 +7,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   AtSign, MessageSquareReply, MessageSquarePlus, HelpCircle, Lightbulb, ClipboardCheck, MessageSquare, CalendarCheck, AlarmClock,
   CheckCircle2, CalendarRange, Star, BadgeCheck, TriangleAlert, OctagonAlert, SlidersHorizontal, TrendingUp,
-  Gavel, RefreshCw, Link2Off, Info, Bell, GraduationCap, Target, Trophy, ShieldAlert,
+  Gavel, RefreshCw, Link2Off, Info, Bell, GraduationCap, Target, Trophy, ShieldAlert, Award,
 } from "lucide-react";
 import { http } from "@/lib/api/http";
 import { fmtDate } from "@/lib/format";
@@ -95,6 +95,7 @@ export const TYPES: TypeMeta[] = [
   meta("weekly_review", "review", "info"),
   meta("rating", "review", "info"),
   meta("rating_ack", "review", "info"),
+  meta("discipline_badge", "review", "info"),
   meta("risk_warn", "risk", "warn"),
   meta("risk_breach", "risk", "critical"),
   meta("risk_repeat_breach", "risk", "critical"),
@@ -135,7 +136,7 @@ export const TYPE_ICONS: Record<string, LucideIcon> = {
   mention: AtSign, reply: MessageSquareReply, review_request: HelpCircle, thread_new: MessageSquarePlus,
   idea_submitted: Lightbulb, idea_review: ClipboardCheck, idea_comment: MessageSquare,
   eod_review_request: CalendarCheck, eod_overdue: AlarmClock, eod_reviewed: CheckCircle2, weekly_review: CalendarRange,
-  rating: Star, rating_ack: BadgeCheck,
+  rating: Star, rating_ack: BadgeCheck, discipline_badge: Award,
   risk_warn: TriangleAlert, risk_breach: OctagonAlert, risk_repeat_breach: OctagonAlert, risk_breach_review: ClipboardCheck, limit_change: SlidersHorizontal, rule_violation: ShieldAlert,
   scaling_proposal: TrendingUp, scaling_decision: Gavel,
   academy_promotion_ready: GraduationCap, academy_promotion_request: GraduationCap, academy_promotion_decision: Gavel,

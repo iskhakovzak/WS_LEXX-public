@@ -21,6 +21,7 @@ export default {
     title: "New game",
     modeLabel: "Mode",
     levelLabel: "Level",
+    tfLabel: "Timeframe",
     play: "Play",
     starting: "Picking a chart…",
     resumeTitle: "Unfinished game",

@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { humanizeApiError } from "@/lib/api/errors";
 import { simI18n } from "@/i18n/ns/simulator";
 import { simOwnI18n } from "@/i18n/ns/simOwn";
-import { simApi, simKeys, type Difficulty, type OrderKind, type OwnPick, type PublicState, type Reveal, type SimMode, type Snapshot, type StepBody, type StepResult } from "./api";
+import { simApi, simKeys, type Difficulty, type OrderKind, type IntradayTf, type OwnPick, type PublicState, type Reveal, type SimMode, type Snapshot, type StepBody, type StepResult } from "./api";
 import { entryBracket, fromWire, maxQtyFor, positionAfter, stepErrorOf, type Speed } from "./model";
 import { BarFeed, markGameRequested } from "./sim-chart";
 
@@ -172,11 +172,11 @@ export function useSimGame(ticket: TicketPrefs, speed: Speed) {
     return () => window.clearInterval(id);
   }, [playing, speed, next]);
 
-  const start = React.useCallback(async (mode: SimMode, difficulty: Difficulty) => {
+  const start = React.useCallback(async (mode: SimMode, difficulty: Difficulty, tf?: IntradayTf | null) => {
     setStarting(true);
     markGameRequested();
     try {
-      load(await simApi.create(mode, difficulty));
+      load(await simApi.create(mode, difficulty, tf));
       void qc.invalidateQueries({ queryKey: simKeys.active() });
     } catch (err) {
       const status = (err as { status?: number }).status;
@@ -186,11 +186,11 @@ export function useSimGame(ticket: TicketPrefs, speed: Speed) {
     }
   }, [load, qc, t]);
 
-  const startOwn = React.useCallback(async (pick: OwnPick, tradeId?: number) => {
+  const startOwn = React.useCallback(async (pick: OwnPick, tradeId?: number, tf?: IntradayTf | null) => {
     setStarting(true);
     markGameRequested();
     try {
-      load(await simApi.createOwn(pick, tradeId));
+      load(await simApi.createOwn(pick, tradeId, tf));
       void qc.invalidateQueries({ queryKey: simKeys.active() });
       void qc.invalidateQueries({ queryKey: simKeys.own() });
     } catch (err) {

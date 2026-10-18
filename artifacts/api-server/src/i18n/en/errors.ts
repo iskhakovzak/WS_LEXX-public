@@ -315,4 +315,5 @@ export default {
   FEED_GENERATE_STAFF_ONLY: "Only a curator can generate the feed",
   PERMISSIONS_CELLS_REJECTED: "Some permission changes can't be applied: the admin and guest rows are locked, and admin-only rights can't be granted below admin",
   DAILY_NOTHING_TO_DISPUTE: "The focus wasn't broken that day — nothing to dispute",
+  SETTINGS_INVALID: "Some settings weren't saved: check the marked fields",
 } satisfies Messages<typeof ru>;

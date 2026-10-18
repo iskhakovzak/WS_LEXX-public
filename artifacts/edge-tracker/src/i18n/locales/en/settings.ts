@@ -468,6 +468,7 @@ export default {
       digest_manage_any: { label: "Digest for others", description: "View/change another member’s digest subscription." },
       permissions_manage: { label: "Change permissions", description: "Edit the desk permissions matrix." },
       admin_errors: { label: "App errors", description: "Console → Errors: server and browser errors, marking as fixed." },
+      settings_manage: { label: "Desk settings", description: "Console → Desk settings: daily-loop thresholds, Telegram send times, privacy." },
     },
   },
 } satisfies Messages<typeof ru>;

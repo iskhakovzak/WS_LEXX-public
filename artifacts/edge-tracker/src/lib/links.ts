@@ -19,8 +19,11 @@ export const links = {
     href("/trades", { ...p, ids: p.ids?.length ? p.ids.join(",") : undefined }),
   journalDay: (date: string, trader?: string) => href("/journal", { date, trader }),
   dayReport: (date: string, trader?: string) => href("/day-report", { date, trader }),
-  /** «Same ticker, same day»: every desk trader's entries / exits on one chart (pages/desk-day). */
-  deskDay: (ticker: string, date: string) => href("/desk-day", { ticker, date }),
+  /** «Same ticker, same day»: every desk trader's entries / exits on one chart (pages/desk-day). `alias` = the day alias
+   *  of one trader to highlight (top of the day → «Трейдер 3»; same numbers desk-wide that day, lib/deskAliases). */
+  deskDay: (ticker: string, date: string, alias?: number) => href("/desk-day", { ticker, date, alias }),
+  /** «Топ дня» (pages/top-results, day view): a NY date and optionally one trader-day opened by its day alias. */
+  topDay: (date?: string, alias?: number) => href("/top-results", { date, alias }),
   /** Simulator «Мои худшие дни»: replay one of the viewer's own losing trades (own trades only, server-checked). */
   simOwn: (tradeId: number) => href("/simulator", { own: tradeId }),
   behavior: (p: { trader?: string; from?: string; to?: string } = {}) => href("/behavior", p),

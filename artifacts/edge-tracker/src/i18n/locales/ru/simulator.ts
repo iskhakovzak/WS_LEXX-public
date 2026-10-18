@@ -21,6 +21,7 @@ export default {
     title: "Новая игра",
     modeLabel: "Режим",
     levelLabel: "Уровень",
+    tfLabel: "Таймфрейм",
     play: "Играть",
     starting: "Подбираем график…",
     resumeTitle: "Игра не закончена",

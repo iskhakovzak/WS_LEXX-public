@@ -2,18 +2,20 @@
  * Daily loop engine — pure (no I/O). One mistake a day, decided from the trades, never self-reported.
  *
  *   analyzeWindow(input)          every mistake of a window (lib/daily/detectors.ts) → hits per day + costs per mistake
- *   pickFocus(costs, disputed)    the costliest REPEATING mistake (≥ 2 days, cost ≤ −MIN_FOCUS_COST), disputed excluded
+ *   pickFocus(costs, disputed)    the costliest REPEATING mistake (≥ focusMinDays, cost ≤ −focusMinCost), disputed excluded
  *   focusOf(...)                  DailyFocus with its one line (TextItem `focus.<mistakeId>` {cost, count, days})
  *   verdictOf(analysis, date, m)  was the mistake there that day: kept / broken / no_trades / unknown (+ hits)
  *   contractOf(analysis, date, p) the own contract (daily stop / max trades / own rule) → disciplineDelta
  *   tradeToReview(analysis, date) biggest loss, else giveback, else a focus hit, else the best trade
  *   tierProgressOf(evaluation)    «to Junior: 3 of 5» from lib/scalingEngine
  *
+ * Window length, repeat days and the minimum cost are desk settings (lib/settings registry, group "daily"), read per call.
  * Money is net ($, ≤ 0 = cost). Dates are New York trading days.
  */
 import type { BehaviorTrade } from "../behaviorEngine";
 import { addDays, isWeekend } from "../tradingDate";
 import type { Evaluation } from "../scalingEngine";
+import { setting } from "../settings/registry";
 import {
   HitBook, dayPath, detectBehavior, detectDay, detectRules, detectStructure, dailyLossLimit, refOf, ruleKinds, windowDays,
   type DayHits, type DetectInput, type PlanContract,
@@ -24,12 +26,17 @@ import type {
 
 export type { DayHit, DetectInput, PlanContract } from "./detectors";
 
-/** Trading days in the focus window (≈ two weeks). */
-export const FOCUS_WINDOW_DAYS = 10;
-/** A mistake must repeat on at least this many days of the window to become the focus. */
-export const FOCUS_MIN_DAYS = 2;
-/** Smaller costs are noise — the focus then says «nothing repeating». */
-export const MIN_FOCUS_COST = 10;
+/** Focus thresholds now in force (admin → «Настройки деска»). */
+export function focusSettings() {
+  return {
+    /** Trading days in the focus window (default 10 ≈ two weeks). */
+    windowDays: setting("daily.focusWindowDays"),
+    /** A mistake must repeat on at least this many days of the window to become the focus. */
+    minDays: setting("daily.focusMinDays"),
+    /** Smaller costs are noise — the focus then says «nothing repeating». */
+    minCost: setting("daily.focusMinCostUsd"),
+  };
+}
 /** Calendar days of history before the window that set the personal norms (behaviour patterns, giveback size). */
 export const NORM_HISTORY_DAYS = 90;
 /** Points the own contract adds to the day's discipline score (lib/behaviorEngine DisciplineDay.contract). */
@@ -43,8 +50,8 @@ export function isMistakeId(v: unknown): v is MistakeId {
 
 const round2 = (v: number) => Math.round(v * 100) / 100;
 
-/** The FOCUS_WINDOW_DAYS weekdays before `date` (exclusive): { from, to }. Holidays simply carry no trades. */
-export function focusWindow(date: string, days = FOCUS_WINDOW_DAYS): { from: string; to: string } {
+/** The focus-window weekdays before `date` (exclusive): { from, to }. Holidays simply carry no trades. */
+export function focusWindow(date: string, days: number = focusSettings().windowDays): { from: string; to: string } {
   let d = date, to = "", n = 0, from = date;
   while (n < days) {
     d = addDays(d, -1);
@@ -115,8 +122,9 @@ export function analyzeWindow(input: DetectInput): WindowAnalysis {
 /** The costliest repeating mistake of the window, or null (nothing repeats, or only small costs). */
 export function pickFocus(costs: readonly MistakeCost[], disputed: ReadonlySet<MistakeId> = new Set()): MistakeCost | null {
   let best: MistakeCost | null = null;
+  const { minDays, minCost } = focusSettings();
   for (const c of costs) {
-    if (c.days < FOCUS_MIN_DAYS || c.costNet == null || c.costNet > -MIN_FOCUS_COST || disputed.has(c.id)) continue;
+    if (c.days < minDays || c.costNet == null || c.costNet > -minCost || disputed.has(c.id)) continue;
     if (!best || c.costNet < (best.costNet ?? 0) || (c.costNet === best.costNet && c.count > best.count)) best = c;
   }
   return best;
@@ -125,7 +133,7 @@ export function pickFocus(costs: readonly MistakeCost[], disputed: ReadonlySet<M
 /** The focus line: `focus.<mistakeId>` {cost, count, days}; `focus.none` when nothing repeats. */
 export function focusOf(trader: string, date: string, window: { from: string; to: string }, pick: MistakeCost | null, source: DailyFocus["source"] = pick ? "auto" : "none"): DailyFocus {
   if (!pick) {
-    return { trader, date, mistake: null, window, costNet: null, count: 0, source: "none", text: { key: "focus.none", params: { days: FOCUS_WINDOW_DAYS } } };
+    return { trader, date, mistake: null, window, costNet: null, count: 0, source: "none", text: { key: "focus.none", params: { days: focusSettings().windowDays } } };
   }
   return {
     trader, date, mistake: pick.id, window, costNet: pick.costNet, count: pick.count, source,

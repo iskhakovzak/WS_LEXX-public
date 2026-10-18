@@ -8,6 +8,7 @@ import { ContractLine } from "./contract-line";
 import { EveningCard } from "./evening-card";
 import { FocusLine, dayShort } from "./focus-line";
 import { TierProgressChip } from "./tier-progress";
+import { RewardsChip } from "./rewards-chip";
 import { useDailyMe, useTodayContract } from "./use-daily";
 
 /** Morning row for a finished day that is still not reviewed: one line, the card opens in place. */
@@ -32,6 +33,15 @@ function PendingRow({ date, onOpen }: { date: string; onOpen: () => void }) {
   );
 }
 
+/** The badge notification links to «/?rewards=1»: open the rewards block right away. */
+function rewardsLinked(): boolean {
+  try {
+    return new URLSearchParams(window.location.search).has("rewards");
+  } catch {
+    return false;
+  }
+}
+
 /**
  * The day line under the dashboard header: ONE thing per touch. Before / during the session — the focus, today's own
  * contract and tier progress; after the close — the evening card of the finished day, which closes to one line once
@@ -50,9 +60,15 @@ export function DayLineView({
   const { t } = dailyI18n.useT();
   const [openPending, setOpenPending] = useState(false);
   const view = dayView(me);
-  const tier = <TierProgressChip progress={me.progress} />;
+  // Progress where the trader looks every day: the tier ladder and the discipline rewards (streak, points, badges).
+  const tier = (
+    <div className="flex min-w-0 flex-col gap-1">
+      <TierProgressChip progress={me.progress} />
+      <RewardsChip discipline={me.discipline} badges={me.badges} defaultOpen={rewardsLinked()} />
+    </div>
+  );
   if (!view) {
-    return me.progress ? <div className="mt-4 border-t border-[var(--glass-border)] pt-3">{tier}</div> : null;
+    return me.progress || me.discipline ? <div className="mt-4 border-t border-[var(--glass-border)] pt-3">{tier}</div> : null;
   }
   const card = view.evening;
   const journalOpen = !!card && journalOpenDate === card.date;

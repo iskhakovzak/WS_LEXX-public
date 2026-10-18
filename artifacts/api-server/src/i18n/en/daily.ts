@@ -101,6 +101,17 @@ export default {
     focus_hit: "Where the day's mistake was",
     best: "The day's best trade",
   },
+  /** Discipline badges (lib/daily/badges.ts) — the Telegram evening card line; {count} = the number in the name. */
+  badge: {
+    streak_1: { one: "contract kept {count} day in a row", other: "contract kept {count} days in a row" },
+    streak_2: { one: "contract kept {count} day in a row", other: "contract kept {count} days in a row" },
+    streak_3: { one: "contract kept {count} day in a row", other: "contract kept {count} days in a row" },
+    reviews: { one: "{count} day reviewed in a row", other: "{count} days reviewed in a row" },
+    focus: { one: "focus clean {count} day in a row", other: "focus clean {count} days in a row" },
+    clean_month: "a month without a daily stop breach",
+    sim_first: "your first own day in the simulator",
+    sim_beat: { one: "beat your real trade {count} time", other: "beat your real trade {count} times" },
+  },
   tg: {
     focusGeneric: "the day's focus",
     button: {
@@ -125,6 +136,9 @@ export default {
       rule: "rule: {rule}",
     },
     evening: {
+      streakDays: { one: "{count} day in a row", other: "{count} days in a row" },
+      streak: "🔥 Contract kept {days} · {points} to discipline",
+      badge: "🏅 New badge: {badges}",
       title: "🌙 <b>Day result · {date}</b>",
       pnl: "P&L <b>{net}</b> · {trades}",
       trades: { one: "{count} trade", other: "{count} trades" },

@@ -1,7 +1,8 @@
 /**
  * Simulator (/simulator) — a hidden real chart, bar by bar, with the desk's fees; the server holds the future.
  *
- *   POST /api/sim/games                {mode, difficulty}        new game (the previous active one is settled first)
+ *   POST /api/sim/games                {mode, difficulty, tf?}   new game (the previous active one is settled first);
+ *                                                                tf = 1m | 2m | 5m (intraday; default = the level's)
  *   GET  /api/sim/games/active                                   the active game (bars up to the cursor) or null
  *   GET  /api/sim/games/:id                                      own game; finished ones carry the reveal
  *   POST /api/sim/games/:id/step       {order?, bracket?, advance} act at the current bar's close, then show N bars
@@ -11,7 +12,7 @@
  *   GET  /api/sim/leaderboard?week=YYYY-MM-DD                    weekly desk board (opted-in players + the viewer)
  *   PUT  /api/sim/prefs                {leaderboardVisible}
  *   GET  /api/sim/own/candidates                                 «Мои худшие дни»: the viewer's replayable losses
- *   POST /api/sim/own                  {pick, tradeId?}          new own game (worst of 30 days | random loss | a trade)
+ *   POST /api/sim/own                  {pick, tradeId?, tf?}     new own game (worst of 30 days | random loss | a trade)
  *
  * Members only (guests are read-only and a game writes). Logic: lib/sim/service.ts; engine: lib/sim/engine.ts.
  */
@@ -34,9 +35,10 @@ async function viewerOf(req: Request): Promise<sim.Viewer> {
 const mode = z.enum(["intraday", "swing"]);
 const difficulty = z.enum(["easy", "medium", "hard"]);
 const price = z.number().finite().positive().max(1_000_000);
+const tf = z.enum(["1m", "2m", "5m"]).nullish();
 
-router.post("/sim/games", route({ body: z.object({ mode, difficulty }) }, async ({ req, body }) => {
-  return sim.createGame(await viewerOf(req), body.mode, body.difficulty);
+router.post("/sim/games", route({ body: z.object({ mode, difficulty, tf }) }, async ({ req, body }) => {
+  return sim.createGame(await viewerOf(req), body.mode, body.difficulty, Math.random, body.mode === "intraday" ? body.tf ?? null : null);
 }));
 
 router.get("/sim/games/active", route({}, async ({ req }) => {
@@ -83,10 +85,10 @@ router.get("/sim/own/candidates", route({}, async ({ req }) => {
 }));
 
 router.post("/sim/own", route({
-  body: z.object({ pick: z.enum(["worst", "random", "trade"]), tradeId: idParam.optional() })
+  body: z.object({ pick: z.enum(["worst", "random", "trade"]), tradeId: idParam.optional(), tf })
     .refine((b) => b.pick !== "trade" || b.tradeId != null, { message: "tradeId", path: ["tradeId"] }),
 }, async ({ req, body }) => {
-  return createOwnGame(await viewerOf(req), body.pick, body.tradeId ?? null);
+  return createOwnGame(await viewerOf(req), body.pick, body.tradeId ?? null, Math.random, body.tf ?? null);
 }));
 
 export default router;

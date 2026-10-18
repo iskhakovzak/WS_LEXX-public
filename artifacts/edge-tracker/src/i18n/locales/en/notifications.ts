@@ -32,6 +32,7 @@ export default {
     weekly_review: { label: "Weekly report", description: "Self-review sent / the curator finished the weekly review / goals updated" },
     rating: { label: "Curator rating", description: "A new or changed weekly rating" },
     rating_ack: { label: "Rating acknowledged", description: "The trader read and acknowledged your rating" },
+    discipline_badge: { label: "Discipline badge", description: "Contract streak, reviewed days, clean focus, a month without a stop breach, simulator" },
     risk_warn: { label: "Close to the limit", description: "≥ 70% of the daily / weekly limit or drawdown used" },
     risk_breach: { label: "Limit exceeded", description: "Daily / weekly limit or max drawdown breached — trading stop" },
     risk_repeat_breach: { label: "Repeat breach", description: "The trader breached a limit for the second time this week — needs a curator review" },

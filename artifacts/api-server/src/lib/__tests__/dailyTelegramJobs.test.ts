@@ -95,6 +95,26 @@ describe("guards", () => {
   });
 });
 
+describe("desk settings (admin → «Настройки деска»)", () => {
+  it("a switch turned off skips the send; the evening waits for the configured time", async () => {
+    const { __loadSettingsCache } = await import("../settings/registry");
+    try {
+      svc.eveningFor.mockImplementation(async (t: string) => card(t));
+      __loadSettingsCache({ "telegram.morningEnabled": false, "telegram.contractAlertsEnabled": false, "telegram.eveningTime": "18:00" });
+      expect(await jobs.runMorningFocus({ now: AT.morning })).toMatchObject({ skipped: "off in desk settings" });
+      expect(await jobs.runContractAlerts({ now: AT.session, check: async () => [breach] })).toMatchObject({ skipped: "off in desk settings" });
+      expect(await jobs.runEveningCards({ now: AT.evening })).toMatchObject({ skipped: "before the evening time" });
+      expect(tg.sendMessage).not.toHaveBeenCalled();
+      // 18:05 NY: the evening time passed → the cards go (a sync after the time sends them too)
+      expect(await jobs.runEveningCards({ now: new Date("2026-10-16T22:05:00Z") })).toMatchObject({ sent: 2 });
+      __loadSettingsCache({ "telegram.eveningEnabled": false });
+      expect(await jobs.runEveningCards({ now: new Date("2026-10-16T22:10:00Z") })).toMatchObject({ skipped: "off in desk settings" });
+    } finally {
+      __loadSettingsCache({});
+    }
+  });
+});
+
 describe("once per trader + kind + day", () => {
   it("a contract alert is sent once, also across later syncs and a restart", async () => {
     const check = vi.fn(async () => [breach, { ...breach, kind: "max_trades" as const, limit: 10, actual: 11 }]);
@@ -140,7 +160,7 @@ describe("registry", () => {
   it("registers the three jobs; disabled when the bot is not configured", async () => {
     vi.resetModules();
     guard.on = false;
-    const { listJobs, clearJobs } = await import("../../jobs/registry");
+    const { listJobs, clearJobs, cronOf } = await import("../../jobs/registry");
     const { registerAllJobs } = await import("../../jobs/definitions");
     clearJobs();
     registerAllJobs();
@@ -149,8 +169,8 @@ describe("registry", () => {
       expect(byName.has(n)).toBe(true);
       expect(byName.get(n)!.enabled?.()).toBe(false);
     }
-    expect(byName.get("telegram.daily-morning")!.cron).toBe("45 8 * * 1-5");
-    expect(byName.get("telegram.daily-evening")!.cron).toBe("30 16 * * 1-5");
+    expect(cronOf(byName.get("telegram.daily-morning")!)).toBe("45 8 * * 1-5"); // desk-settings defaults
+    expect(cronOf(byName.get("telegram.daily-evening")!)).toBe("30 16 * * 1-5");
     expect(byName.get("telegram.daily-evening")!.on).toContain("propreports.synced");
     expect(byName.get("telegram.contract-alerts")!.on).toContain("propreports.synced");
     expect(await byName.get("telegram.daily-morning")!.run({ signal: new AbortController().signal, trigger: "manual", logger: console, runId: null })).toMatchObject({ skipped: expect.any(String) });

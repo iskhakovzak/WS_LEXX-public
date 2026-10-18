@@ -18,7 +18,7 @@ const trade = (id: number, trader: string, legs: DeskLeg[]): DeskTrade => ({
   fidelity: "fills", net: null, qty: null, redacted: true, legs,
 });
 const trader = (name: string, me = false): DeskTrader => ({
-  name, me, side: "long", trades: 1, result: "win", r: 1, firstAt: null, lastAt: null, holdSec: null, addedAgainst: false, net: null, redacted: !me,
+  name, alias: null, me, side: "long", trades: 1, result: "win", r: 1, firstAt: null, lastAt: null, holdSec: null, addedAgainst: false, net: null, redacted: !me,
 });
 
 describe("desk-day model", () => {

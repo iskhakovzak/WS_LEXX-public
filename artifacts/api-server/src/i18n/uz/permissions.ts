@@ -63,5 +63,6 @@ export default {
     "digest.manage.any": { label: "Boshqalar uchun dayjest", description: "Boshqa aʼzoning dayjest obunasini koʻrish yoki oʻzgartirish." },
     "permissions.manage": { label: "Huquqlarni oʻzgartirish", description: "PUT /permissions/matrix." },
     "admin.errors": { label: "Ilova xatolari", description: "Boshqaruv → Xatolar: server va brauzer xatolari, «tuzatildi» belgisi." },
+    "settings.manage": { label: "Desk sozlamalari", description: "Boshqaruv → Desk sozlamalari: kunlik sikl chegaralari, Telegram yuborish vaqti, maxfiylik (GET/PUT /admin/settings)." },
   },
 } satisfies CapabilityTexts;

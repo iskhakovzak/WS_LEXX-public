@@ -3,6 +3,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { runMigrations } from "./lib/migrate";
 import { reloadLatinNames } from "./lib/people/latinNames";
+import { warmSettings } from "./lib/settings/store";
 import { ensureTradeStructureSchema } from "./lib/tradeStructureStore";
 import { registerWebhook } from "./lib/telegramBot";
 import { telegramWebhookSecret } from "./routes/telegram";
@@ -112,6 +113,8 @@ async function startServer(attempt = 1): Promise<void> {
     }
     // Latin display names for EN/UZ readers (lib/people/latinNames): warm the table before the first render.
     await reloadLatinNames();
+    // Desk settings (lib/settings): stored values into the setting() cache before jobs and requests read them.
+    await warmSettings();
   }
 
   return new Promise((resolve, reject) => {

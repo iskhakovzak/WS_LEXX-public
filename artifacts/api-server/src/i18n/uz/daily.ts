@@ -101,6 +101,17 @@ export default {
     focus_hit: "Kun xatosi shu yerda edi",
     best: "Kunning eng yaxshi savdosi",
   },
+  /** Discipline badges (lib/daily/badges.ts) — the Telegram evening card line; {count} = the number in the name. */
+  badge: {
+    streak_1: { one: "kontrakt ketma-ket {count} kun", other: "kontrakt ketma-ket {count} kun" },
+    streak_2: { one: "kontrakt ketma-ket {count} kun", other: "kontrakt ketma-ket {count} kun" },
+    streak_3: { one: "kontrakt ketma-ket {count} kun", other: "kontrakt ketma-ket {count} kun" },
+    reviews: { one: "ketma-ket {count} kun tahlil qilindi", other: "ketma-ket {count} kun tahlil qilindi" },
+    focus: { one: "fokus ketma-ket {count} kun toza", other: "fokus ketma-ket {count} kun toza" },
+    clean_month: "kunlik stop buzilmagan oy",
+    sim_first: "simulyatorda birinchi oʻz kuningiz",
+    sim_beat: { one: "real savdodan {count} marta yaxshiroq", other: "real savdodan {count} marta yaxshiroq" },
+  },
   tg: {
     focusGeneric: "kun fokusi",
     button: {
@@ -125,6 +136,9 @@ export default {
       rule: "qoida: {rule}",
     },
     evening: {
+      streakDays: { one: "ketma-ket {count} kun", other: "ketma-ket {count} kun" },
+      streak: "🔥 Kontrakt bajarildi: {days} · intizomga {points}",
+      badge: "🏅 Yangi mukofot: {badges}",
       title: "🌙 <b>Kun yakuni · {date}</b>",
       pnl: "P&L <b>{net}</b> · {trades}",
       trades: { one: "{count} ta savdo", other: "{count} ta savdo" },

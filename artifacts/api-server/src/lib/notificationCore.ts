@@ -54,6 +54,7 @@ const TYPE_DEFS: readonly NotificationTypeDef[] = [
   { type: "weekly_review", group: "review", severity: "info" },
   { type: "rating", group: "review", severity: "info" },
   { type: "rating_ack", group: "review", severity: "info" },
+  { type: "discipline_badge", group: "review", severity: "info" },
   // risk
   { type: "risk_warn", group: "risk", severity: "warn" },
   { type: "risk_breach", group: "risk", severity: "critical" },

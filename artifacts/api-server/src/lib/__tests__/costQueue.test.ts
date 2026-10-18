@@ -31,8 +31,11 @@ describe("costQueue reasons", () => {
   });
 
   it("stop breach: the deepest overshoot of alerts wins; an alert without $ still flags", () => {
-    const r = stopBreachReason(-50, 300, [], [{ id: 9, kind: "drawdown", used: 3630, limit: 2000, reviewed: false }]);
-    expect(r).toMatchObject({ costNet: -1630, text: { params: { scope: "drawdown" } } });
+    // A drawdown breach is a lasting state: it costs only the loss added that day, not the whole overshoot.
+    const dd = { id: 9, kind: "drawdown", used: 3630, limit: 2000, reviewed: false };
+    expect(stopBreachReason(-50, 300, [], [dd])).toMatchObject({ costNet: -50, text: { params: { scope: "drawdown" } } });
+    expect(stopBreachReason(-5000, null, [], [dd])).toMatchObject({ costNet: -1630 });
+    expect(stopBreachReason(120, 300, [], [dd])).toMatchObject({ costNet: null, text: { params: { scope: "drawdown" } } });
     expect(stopBreachReason(null, null, [], [{ id: 9, kind: "stop", used: null, limit: null, reviewed: false }])).toMatchObject({ costNet: null });
   });
 

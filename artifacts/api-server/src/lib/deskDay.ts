@@ -7,8 +7,22 @@
  * for (own trades; staff see all). For everyone else the answer keeps prices, times, roles, side, result and R, and
  * drops every field that would let the client compute $ (qty, position sizes, realized $, net, fees, risk $).
  *
+ * Names (owner decision 2026-10-18, setting `privacy.hideNamesFromTraders`): three views.
+ *   staff      curators / admins — names and every $ (as before).
+ *   anonymous  a trader while names are hidden — every trader is a day alias («Трейдер 3», lib/deskAliases, numbered
+ *              over the whole desk of that date so the same person has the same number on every ticker and on the top
+ *              of the day); the viewer's own row is «я». Nobody is identifiable, so $ and share counts are shown (the
+ *              owner wants «сколько заработали / потеряли»). No real name anywhere in the answer: trader keys are
+ *              "t<alias>", other traders' trade ids are replaced with negative sequence numbers (a real id could be
+ *              looked up elsewhere), takeaways and office contributors carry keys only.
+ *   named      a trader while the setting is off — names, and no other trader's $ or share counts (the old rule).
+ * Plus the office position layer (lib/deskOffice.ts): shares only for staff; office $ for staff and the anonymous view,
+ * and in the named view only with ≥ 3 traders on the ticker-day (a sum over three people does not reveal one of them,
+ * even after the viewer subtracts their own result; with two it would).
+ *
  * Unit-tested in __tests__/deskDay.test.ts.
  */
+import { officePosition, type OfficePosition } from "./deskOffice";
 import { canSeeTradeMoney, type MoneyViewer } from "./playbookPrivacy";
 import { netPnl, normResult, signedR } from "./tradeMath";
 import { nyMinutes } from "./tradingDate";
@@ -79,7 +93,10 @@ export interface DeskTrade {
 }
 
 export interface DeskTrader {
+  /** Real name (staff / named view) or the alias key "t<alias>" (anonymous view). */
   name: string;
+  /** Day alias number (same person = same number across the desk that day). */
+  alias: number | null;
   me: boolean;
   side: Side | "both";
   trades: number;
@@ -102,15 +119,26 @@ export type DeskTakeaway =
   | { kind: "timing"; winnersAt: string; losersAt: string; winners: number; losers: number }
   | { kind: "sides"; long: { traders: number; winners: number }; short: { traders: number; winners: number } };
 
+export type DeskView = "staff" | "anonymous" | "named";
+
+export type DeskOffice = Omit<OfficePosition, "contributors"> & {
+  contributors: { trader: string; alias: number | null; me: boolean; share: number }[];
+};
+
 export interface DeskDay {
   ticker: string;
   date: string;
-  /** Viewer's name (null for none). */
+  view: DeskView;
+  /** Viewer's trader key (name, or alias key in the anonymous view); null for none / not on this ticker (anonymous). */
   me: string | null;
   traders: DeskTrader[];
   trades: DeskTrade[];
   takeaways: DeskTakeaway[];
+  office: DeskOffice | null;
 }
+
+/** Fewest traders on a ticker-day for the office $ in the named view (see the header). */
+export const OFFICE_NET_MIN_TRADERS = 3;
 
 const round = (n: number, d = 4) => Math.round(n * 10 ** d) / 10 ** d;
 const epoch = (iso: string | null): number | null => {
@@ -222,6 +250,7 @@ export function shapeTraders(rows: readonly DeskTradeRow[], trades: readonly Des
     const nets = list.map((t) => netPnl(rowById.get(t.id) ?? {}));
     out.push({
       name,
+      alias: null,
       me: !!viewer.name && viewer.name === name,
       side: sides.size > 1 ? "both" : [...sides][0],
       trades: list.length,
@@ -286,14 +315,68 @@ export function takeaways(traders: readonly DeskTrader[], trades: readonly DeskT
   return out;
 }
 
+export interface DeskDayOpts {
+  /** Day aliases over the whole desk (lib/deskAliases); traders missing from it get numbers after the last one. */
+  aliases?: ReadonlyMap<string, number>;
+  /** privacy.hideNamesFromTraders (default false here; the store passes the setting). */
+  hideNames?: boolean;
+}
+
+export function viewOf(viewer: MoneyViewer, hideNames: boolean): DeskView {
+  return viewer.staff ? "staff" : hideNames ? "anonymous" : "named";
+}
+
+/** Complete alias map: given aliases plus numbers after the last one for anybody missing (sorted by name). */
+function aliasMap(names: Iterable<string>, given: ReadonlyMap<string, number> | undefined): Map<string, number> {
+  const out = new Map(given ?? []);
+  let next = Math.max(0, ...out.values()) + 1;
+  for (const n of [...new Set(names)].sort()) if (!out.has(n)) out.set(n, next++);
+  return out;
+}
+
+/** The anonymous view of a fully built day: alias keys instead of names, synthetic ids for other traders' trades. */
+export function anonymize(day: DeskDay, aliases: ReadonlyMap<string, number>, viewerName: string | null): DeskDay {
+  const key = (n: string) => `t${aliases.get(n) ?? 0}`;
+  let seq = 0;
+  const ids = new Map<number, number>();
+  const trades = day.trades.map((t) => {
+    const own = !!viewerName && t.trader === viewerName;
+    const id = own ? t.id : -(++seq);
+    ids.set(t.id, id);
+    return { ...t, id, trader: key(t.trader) };
+  });
+  return {
+    ...day,
+    me: viewerName && day.traders.some((t) => t.name === viewerName) ? key(viewerName) : null,
+    traders: day.traders.map((t) => ({ ...t, name: key(t.name) })),
+    trades,
+    takeaways: day.takeaways.map((tk) => (tk.kind === "best" ? { ...tk, trader: key(tk.trader) } : tk)),
+    office: day.office ? { ...day.office, contributors: day.office.contributors.map((c) => ({ ...c, trader: key(c.trader) })) } : null,
+  };
+}
+
 /** The whole answer from rows + their structures (rows without a structure are skipped). */
 export function buildDeskDay(
   ticker: string, date: string, rows: readonly DeskTradeRow[], structures: ReadonlyMap<number, TradeStructure>, viewer: MoneyViewer,
+  opts: DeskDayOpts = {},
 ): DeskDay {
-  const trades = rows
-    .filter((r) => structures.has(r.id))
-    .map((r) => shapeTrade(r, structures.get(r.id)!, viewer))
+  const view = viewOf(viewer, !!opts.hideNames);
+  // The anonymous view shows everyone's $ (nobody is identifiable); the named view keeps the per-trade money rule.
+  const moneyViewer: MoneyViewer = view === "anonymous" ? { name: viewer.name, staff: true } : viewer;
+  const shaped = rows.filter((r) => structures.has(r.id));
+  const trades = shaped
+    .map((r) => shapeTrade(r, structures.get(r.id)!, moneyViewer))
     .sort((a, b) => (a.firstAt ?? "").localeCompare(b.firstAt ?? "") || a.id - b.id);
-  const traders = shapeTraders(rows, trades, viewer);
-  return { ticker, date, me: viewer.name, traders, trades, takeaways: takeaways(traders, trades) };
+  const aliases = aliasMap(rows.map((r) => r.trader), opts.aliases);
+  const traders = shapeTraders(rows, trades, moneyViewer).map((t) => ({ ...t, me: !!viewer.name && viewer.name === t.name, alias: aliases.get(t.name) ?? null }));
+  const office = officePosition(shaped, structures, shaped.map((r) => netPnl(r)), view === "staff");
+  const day: DeskDay = {
+    ticker, date, view, me: viewer.name, traders, trades, takeaways: takeaways(traders, trades),
+    office: office && {
+      ...office,
+      net: view === "named" && traders.length < OFFICE_NET_MIN_TRADERS ? null : office.net,
+      contributors: office.contributors.map((c) => ({ ...c, alias: aliases.get(c.trader) ?? null, me: !!viewer.name && viewer.name === c.trader })),
+    },
+  };
+  return view === "anonymous" ? anonymize(day, aliases, viewer.name) : day;
 }

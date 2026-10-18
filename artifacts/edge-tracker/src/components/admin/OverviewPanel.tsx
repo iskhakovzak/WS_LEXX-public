@@ -19,7 +19,7 @@ import { commonI18n } from "@/i18n/ns/common";
 import { adminI18n } from "@/i18n/ns/admin";
 import { personName } from "@/i18n";
 
-export type AdminTab = "overview" | "people" | "moderation" | "roles" | "data" | "audit" | "errors";
+export type AdminTab = "overview" | "people" | "moderation" | "roles" | "settings" | "data" | "audit" | "errors";
 
 /** People (display names) or accounts (unchanged: personName leaves non-names as they are). */
 function names(raw: string[], max = 4) {

@@ -146,7 +146,7 @@ export const NAV_GROUPS: NavGroup[] = [
     ] }),
     nav("ratings", { href: "/ratings", icon: Trophy, keywords: "ratings рейтинг трейдеров leaderboard", children: [
       nav("benchmark", { short: true, href: "/benchmark", icon: Gauge, keywords: "benchmark бенчмарк сравнение команда деск перцентили sharpe" }),
-      nav("topResults", { href: "/top-results", icon: Crown, keywords: "top results лучшие", staff: true }),
+      nav("topResults", { href: "/top-results", icon: Crown, keywords: "top results лучшие топ дня top of the day календарь прибыль убыток лидеры" }),
       nav("office", { short: true, href: "/office", icon: Building2, keywords: "office офис партнёры статистика стратегии цель капитал" }),
     ] }),
   ]),

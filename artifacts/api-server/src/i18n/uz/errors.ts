@@ -315,4 +315,5 @@ export default {
   FEED_GENERATE_STAFF_ONLY: "Lentani faqat kurator yarata oladi",
   PERMISSIONS_CELLS_REJECTED: "Huquqlardagi baʼzi oʻzgarishlarni qoʻllab boʻlmaydi: admin va mehmon qatorlari yopiq, «faqat admin uchun» huquqlar admindan pastga berilmaydi",
   DAILY_NOTHING_TO_DISPUTE: "Bu kunda fokus buzilmagan — eʼtiroz bildiradigan narsa yoʻq",
+  SETTINGS_INVALID: "Baʼzi sozlamalar saqlanmadi: belgilangan maydonlarni tekshiring",
 } satisfies Messages<typeof ru>;

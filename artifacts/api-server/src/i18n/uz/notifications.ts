@@ -40,6 +40,27 @@ export default {
     staffTitle: "{user}: {title}",
     passedBody: { one: "{count} savdo kunida natija {net}.", other: "{count} savdo kunida natija {net}." },
   },
+  discipline_badge: {
+    title: "Yangi mukofot",
+    streak: {
+      title: { one: "Mukofot: kontrakt ketma-ket {count} kun bajarildi", other: "Mukofot: kontrakt ketma-ket {count} kun bajarildi" },
+      body: "Oʻz stopingiz va qoidalaringiz kundan-kunga bajarildi. Seriya va ballar — bosh sahifada.",
+    },
+    reviews: {
+      title: { one: "Mukofot: ketma-ket {count} kun tahlil qilindi", other: "Mukofot: ketma-ket {count} kun tahlil qilindi" },
+      body: "Har bir savdo kuni oʻz vaqtida tahlil qilindi.",
+    },
+    focus: {
+      title: { one: "Mukofot: fokus ketma-ket {count} kun toza", other: "Mukofot: fokus ketma-ket {count} kun toza" },
+      body: "Kun fokusidagi xato takrorlanmadi.",
+    },
+    clean_month: { title: "Mukofot: kunlik stop buzilmagan oy", body: "Butun oy davomida kunlik stopga bir marta ham yetilmadi." },
+    sim_first: { title: "Mukofot: simulyatorda birinchi oʻz kuningiz", body: "Oʻz savdoingizni qayta oʻynadingiz — xato shunday yaxshiroq eslab qolinadi." },
+    sim_beat: {
+      title: { one: "Mukofot: real savdodan {count} marta yaxshiroq", other: "Mukofot: real savdodan {count} marta yaxshiroq" },
+      body: "Simulyatorda yangi qaroringiz realdagidan yaxshiroq chiqdi.",
+    },
+  },
   // ── server-b (translation wave) ──
   /** Type labels and descriptions (preferences panel, chips); key = canonical type (lib/notificationCore.ts). */
   types: {
@@ -81,6 +102,7 @@ export default {
     academy_graded: { label: "Topshiriq tekshirildi", description: "Mentor topshirigʻingizni tekshirdi" },
     sync: { label: "PropReports sinxronlash", description: "Sinxronlash yoki import natijasi: qoʻshildi / yangilandi / xatolar" },
     sync_unmatched: { label: "Bogʻlanmagan hisoblar", description: "Koʻchirmada treyderlarga bogʻlanmagan hisoblar bor" },
+    discipline_badge: { label: "Intizom mukofoti", description: "Kontrakt seriyasi, tahlil qilingan kunlar, toza fokus, stop buzilmagan oy, simulyator" },
     system: { label: "Tizim", description: "Xizmat xabarlari" },
   },
   groups: {

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CLIENT_CODES, http, isApiError } from "@/lib/api/http";
 import { POLL, STALE } from "@/lib/api/keys";
 import { curatorI18n } from "@/i18n/ns/curator";
-import type { CostQueueItem, DailyFocus, FocusVerdict, MistakeCost, MistakeId } from "@/lib/daily/types";
+import type { BadgeState, CostQueueItem, DailyFocus, DisciplineSummary, FocusVerdict, MistakeCost, MistakeId } from "@/lib/daily/types";
 
 /**
  * «Кабинет куратора» client: types + lib/api/http hooks for /api/curator/* and the risk-process endpoints
@@ -105,6 +105,8 @@ export type CuratorFocus = {
   history: { date: string; trades: number; netPnl: number | null; focus: FocusVerdict | null; reviewed: boolean }[];
   options: MistakeCost[];
   window: { from: string; to: string };
+  /** Contract streak, discipline points / level and badges (api lib/daily/rewards); absent on older servers. */
+  rewards?: { discipline: DisciplineSummary; badges: BadgeState[] } | null;
 };
 
 export type TradersPayload = { date: string; scope: Scope; wards: number; traders: TraderSignal[] };

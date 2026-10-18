@@ -106,6 +106,17 @@ export default {
     best: "Лучшая сделка дня",
   },
   /** Telegram bot (lib/daily/telegramText.ts): HTML; params arrive escaped, money preformatted («−$310»). */
+  /** Discipline badges (lib/daily/badges.ts) — the Telegram evening card line; {count} = the number in the name. */
+  badge: {
+    streak_1: { one: "контракт {count} день подряд", few: "контракт {count} дня подряд", many: "контракт {count} дней подряд", other: "контракт {count} дня подряд" },
+    streak_2: { one: "контракт {count} день подряд", few: "контракт {count} дня подряд", many: "контракт {count} дней подряд", other: "контракт {count} дня подряд" },
+    streak_3: { one: "контракт {count} день подряд", few: "контракт {count} дня подряд", many: "контракт {count} дней подряд", other: "контракт {count} дня подряд" },
+    reviews: { one: "{count} разобранный день подряд", few: "{count} разобранных дня подряд", many: "{count} разобранных дней подряд", other: "{count} разобранного дня подряд" },
+    focus: { one: "фокус чист {count} день подряд", few: "фокус чист {count} дня подряд", many: "фокус чист {count} дней подряд", other: "фокус чист {count} дня подряд" },
+    clean_month: "месяц без нарушения дневного стопа",
+    sim_first: "первый свой день в симуляторе",
+    sim_beat: { one: "{count} раз лучше реальной сделки", few: "{count} раза лучше реальной сделки", many: "{count} раз лучше реальной сделки", other: "{count} раза лучше реальной сделки" },
+  },
   tg: {
     focusGeneric: "фокус дня",
     button: {
@@ -130,6 +141,9 @@ export default {
       rule: "правило: {rule}",
     },
     evening: {
+      streakDays: { one: "{count} день подряд", few: "{count} дня подряд", many: "{count} дней подряд", other: "{count} дня подряд" },
+      streak: "🔥 Контракт соблюдён {days} · {points} к дисциплине",
+      badge: "🏅 Новая награда: {badges}",
       title: "🌙 <b>Итог дня · {date}</b>",
       pnl: "P&L <b>{net}</b> · {trades}",
       trades: { one: "{count} сделка", few: "{count} сделки", many: "{count} сделок", other: "{count} сделки" },

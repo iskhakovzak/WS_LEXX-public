@@ -13,7 +13,7 @@ import { notFound } from "../http";
 import { logger } from "../logger";
 import { addDays, nyDate } from "../tradingDate";
 import { mistakeCosts } from "../daily/service";
-import { fakeTimes, maxNotionalOf } from "./scenario";
+import { aggregate, fakeTimes, maxNotionalOf, tfSec, type IntradayTf } from "./scenario";
 import {
   OWN_WINDOW_DAYS, buildOwn, feePerShareOf, netOf, ownParamsOf, pickOrder, realMistakes, realStructure, riskOf,
   type OwnBuilt, type OwnCandidate, type OwnPick, type OwnTradeRow,
@@ -40,14 +40,21 @@ const firstLast = (t: OwnTradeRow): { first: number; last: number } | null => {
   return ts.length ? { first: Math.min(...ts), last: Math.max(...ts) } : null;
 };
 
-async function build(t: OwnTradeRow): Promise<OwnBuilt | null> {
+/**
+ * The game of one trade on `want` (null = the archived bar size). A day archived only at 5m plays at 5m whatever was
+ * asked (a finer bar cannot be made up); 2m and 5m are aggregated from archived 1m bars.
+ */
+async function build(t: OwnTradeRow, want: IntradayTf | null): Promise<OwnBuilt | null> {
   const fl = firstLast(t);
   if (!fl) return null;
   const data = await store.loadDayBars(t.ticker, t.day);
   if (!data || (data.tf !== "1m" && data.tf !== "5m")) return null;
-  const tf = data.tf;
-  const prev = await store.loadPrevDay(t.ticker, t.day, tf === "1m" ? 60 : 300);
-  const built = buildOwn({ day: t.day, tf, dayBars: data.bars, prevBars: prev?.bars ?? [], prevLevels: prev?.levels ?? null, firstAt: fl.first, lastAt: fl.last });
+  const tf: IntradayTf = data.tf === "5m" ? "5m" : want ?? "1m";
+  const sec = tfSec(tf);
+  const prev = await store.loadPrevDay(t.ticker, t.day, sec);
+  // Aggregating bars already at `sec` (a 5m archive day) is a no-op, so 1m and 5m sources go through the same path.
+  const at = (bars: typeof data.bars) => (sec === 60 ? bars : aggregate(bars, sec));
+  const built = buildOwn({ day: t.day, tf, dayBars: at(data.bars), prevBars: at(prev?.bars ?? []), prevLevels: prev?.levels ?? null, firstAt: fl.first, lastAt: fl.last });
   if (built && built.levels.pdc == null && data.prevClose != null) built.levels.pdc = data.prevClose;
   return built;
 }
@@ -88,14 +95,16 @@ export async function ownCandidates(viewer: Viewer): Promise<OwnCandidatesView> 
   return { trades, worst: order[0]?.id ?? null, windowDays: OWN_WINDOW_DAYS };
 }
 
-export async function createOwnGame(viewer: Viewer, pick: OwnPick, tradeId: number | null, rnd: () => number = Math.random): Promise<Snapshot> {
+export async function createOwnGame(
+  viewer: Viewer, pick: OwnPick, tradeId: number | null, rnd: () => number = Math.random, tf: IntradayTf | null = null,
+): Promise<Snapshot> {
   await settleActive(viewer);
   let chosen: { t: OwnTradeRow; built: OwnBuilt; mistakes: string[] } | null = null;
   if (pick === "trade") {
     const lastDay = lastPlayableDay();
     const t = tradeId != null ? await ownStore.ownTrade(viewer.name, lastDay, tradeId) : null;
     if (!t) throw notFound("TRADE_NOT_FOUND", { reason: "notReplayable" });
-    const built = await build(t);
+    const built = await build(t, tf);
     if (!built) throw notFound("NOT_FOUND", { reason: "noBars" });
     const daily = await dailyMistakesByTrade(viewer.name, t.day, t.day);
     chosen = { t, built, mistakes: [...realMistakes(t), ...(daily.get(t.id) ?? [])] };
@@ -107,7 +116,7 @@ export async function createOwnGame(viewer: Viewer, pick: OwnPick, tradeId: numb
     const byId = new Map(rows.map((r) => [r.id, r]));
     for (const c of order.slice(0, 6)) {
       const t = byId.get(c.id)!;
-      const built = await build(t);
+      const built = await build(t, tf);
       if (built) { chosen = { t, built, mistakes: mistakes.get(t.id) ?? [] }; break; }
     }
     if (!chosen) throw notFound("NOT_FOUND", { reason: "noBars" });

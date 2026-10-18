@@ -12,6 +12,7 @@ import { closeDateSql, netPnlSql, num } from "../tradeMath";
 import { logger } from "../logger";
 import { lastFinishedDay, queueDays, storedVerdict, warmVerdicts, type StoredVerdictRow } from "./costQueue";
 import { eveningFor, focusFor, mistakeCosts } from "./service";
+import { rewardsFor, type Rewards } from "./rewards";
 import type { DailyFocus, FocusVerdict, MistakeCost } from "./types";
 
 export const FOCUS_HISTORY_DAYS = 10;
@@ -29,6 +30,8 @@ export interface CuratorFocus {
   /** The trader's mistakes over the history window that cost money, costliest first. */
   options: MistakeCost[];
   window: { from: string; to: string };
+  /** Contract streak, discipline points / level and badges (lib/daily/rewards); null when not computed in time. */
+  rewards?: Rewards | null;
 }
 
 function nextWeekday(d: string): string {
@@ -95,10 +98,11 @@ export async function curatorFocusFor(trader: string, today: string): Promise<Cu
   const now = { date: nyDate(), minutes: nyMinutes() };
   const days = queueDays(lastFinishedDay(today, now), FOCUS_HISTORY_DAYS - 1);
   const window = { from: days[days.length - 1], to: days[0] };
-  const [current, history, options] = await Promise.all([
+  const [current, history, options, rewards] = await Promise.all([
     withBudget(focusFor(trader, shownFocusDay(today)), null),
     withBudget(loadHistory(trader, days), [] as FocusHistoryDay[], BUDGET_MS + 500),
     withBudget(mistakeCosts(trader, window.from, window.to), [] as MistakeCost[]),
+    withBudget(rewardsFor(trader), null),
   ]);
   return {
     current,
@@ -106,5 +110,6 @@ export async function curatorFocusFor(trader: string, today: string): Promise<Cu
     history,
     options: options.filter((o) => o.id && (o.costNet ?? 0) < 0).slice(0, 8),
     window,
+    rewards,
   };
 }

@@ -65,5 +65,6 @@ export default {
     "digest.manage.any": { label: "Digest for others", description: "View or change another member’s digest subscription." },
     "permissions.manage": { label: "Change permissions", description: "PUT /permissions/matrix." },
     "admin.errors": { label: "App errors", description: "Control room → Errors: server and browser errors, marking them fixed." },
+    "settings.manage": { label: "Desk settings", description: "Control room → Desk settings: daily-loop thresholds, Telegram send times, privacy (GET/PUT /admin/settings)." },
   },
 } satisfies CapabilityTexts;

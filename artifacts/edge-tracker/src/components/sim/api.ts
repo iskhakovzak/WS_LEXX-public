@@ -9,7 +9,11 @@ import { OWN_CANDIDATES_KEY } from "@/components/shared/replay-own-day";
 
 export type SimMode = "intraday" | "swing";
 export type Difficulty = "easy" | "medium" | "hard";
-export type SimTf = "1m" | "5m" | "1d";
+export type SimTf = "1m" | "2m" | "5m" | "1d";
+/** Intraday bar sizes the player may pick (server lib/sim/scenario INTRADAY_TFS; 2m is aggregated from 1m). */
+export type IntradayTf = "1m" | "2m" | "5m";
+export const INTRADAY_TFS: readonly IntradayTf[] = ["1m", "2m", "5m"];
+export const isIntradayTf = (v: unknown): v is IntradayTf => v === "1m" || v === "2m" || v === "5m";
 export type OrderKind = "buy" | "sell" | "flat";
 
 /** [t (fake epoch s), o, h, l, c, v] */
@@ -118,8 +122,10 @@ export const myStatsQuery = () => queryOptions({ queryKey: simKeys.me(), queryFn
 export const boardQuery = () => queryOptions({ queryKey: simKeys.board(), queryFn: () => http.get<Board>("/api/sim/leaderboard"), staleTime: STALE.short, meta });
 
 export const simApi = {
-  create: (mode: SimMode, difficulty: Difficulty) => http.post<Snapshot>("/api/sim/games", { mode, difficulty }),
-  createOwn: (pick: OwnPick, tradeId?: number) => http.post<Snapshot>("/api/sim/own", tradeId != null ? { pick, tradeId } : { pick }),
+  create: (mode: SimMode, difficulty: Difficulty, tf?: IntradayTf | null) =>
+    http.post<Snapshot>("/api/sim/games", mode === "intraday" && tf ? { mode, difficulty, tf } : { mode, difficulty }),
+  createOwn: (pick: OwnPick, tradeId?: number, tf?: IntradayTf | null) =>
+    http.post<Snapshot>("/api/sim/own", { pick, ...(tradeId != null ? { tradeId } : {}), ...(tf ? { tf } : {}) }),
   game: (id: number) => http.get<Snapshot>(`/api/sim/games/${id}`),
   step: (id: number, body: StepBody) => http.post<StepResult>(`/api/sim/games/${id}/step`, body),
   undo: (id: number) => http.post<StepResult>(`/api/sim/games/${id}/undo`),

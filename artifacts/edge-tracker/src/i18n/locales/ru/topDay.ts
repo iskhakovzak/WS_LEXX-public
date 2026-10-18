@@ -1,0 +1,60 @@
+/**
+ * `topDay` — «Топ дня» (/top-results, components/top-day/*): month calendar of desk results, top 10 trader-days by profit
+ * and by loss, one trader-day with tickers and links to the desk-day chart. RU addresses the trader as «ты».
+ * Names are hidden from traders: «Трейдер {n}» is a day alias, the viewer's own row is «Я». Tickers, P&L, Long/Short stay.
+ */
+export default {
+  title: "Топ дня",
+  desc: "Лучшие и худшие дни трейдеров деска: открой день, посмотри тикеры и входы на графике",
+  link: "Топ дня",
+  tabs: { aria: "Вид топа", day: "День", period: "Период" },
+  privacy: {
+    anonymous: "Имена скрыты: номер трейдера действует только в этот день — тот же, что на графике тикера.",
+    named: "Суммы других трейдеров скрыты.",
+  },
+  trader: "Трейдер {n}",
+  me: "Я",
+  calendar: {
+    prev: "Предыдущий месяц",
+    next: "Следующий месяц",
+    today: "Сегодня",
+    holiday: "Биржа закрыта",
+    noTrades: "Сделок нет",
+    monthNet: "Деск за месяц: {net}",
+    dayAria: "{date}: деск {net}, {traders}",
+    dayAriaNoNet: "{date}: {traders}",
+    mine: "Твой день: {net}",
+    legendMine: "точка — ты торговал",
+  },
+  day: {
+    desk: "Деск {net}",
+    profit: "Топ‑10 прибыль",
+    loss: "Топ‑10 убыток",
+    emptyProfit: "В плюсе в этот день никого.",
+    emptyLoss: "В минусе в этот день никого.",
+    noTrades: "В этот день сделок деска нет — выбери другой день в календаре.",
+    pick: "Выбери день в календаре.",
+    myPlaceProfit: "Ты: {place} место по прибыли · {net}",
+    myPlaceLoss: "Ты: {place} место по убытку · {net}",
+    myFlat: "Ты: день в ноль",
+    open: "Открыть день: {who}",
+    more: "+{count}",
+    wl: "{wins}W / {losses}L",
+  },
+  sheet: {
+    title: "{who} · {date}",
+    placeProfit: "{place} место по прибыли",
+    placeLoss: "{place} место по убытку",
+    flat: "День в ноль",
+    tickers: "Тикеры дня",
+    chart: "На графике",
+    chartAria: "Открыть {ticker} на графике деска",
+    times: "{from}–{to} ET",
+    side: { long: "Long", short: "Short", both: "Long + Short" },
+    myReport: "Разбор моего дня",
+    traderReport: "Разбор дня трейдера",
+    notFound: "Не удалось открыть этот день.",
+    hidden: "сумма скрыта",
+  },
+  loading: "Загрузка топа…",
+};

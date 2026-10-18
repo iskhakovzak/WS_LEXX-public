@@ -1,10 +1,12 @@
 /**
- * Daily loop in the Telegram bot (same bot as ideas / alerts) — the three sends. Scheduled in src/jobs/definitions.ts:
+ * Daily loop in the Telegram bot (same bot as ideas / alerts) — the three sends. Scheduled in src/jobs/definitions.ts;
+ * times and on/off switches are desk settings (admin → «Настройки деска», lib/daily/telegramSchedule.ts):
  *
- *   telegram.daily-morning    45 8 * * 1-5 NY        focus of the day + own contract (premarket: the previous day is
- *                                                    fully synced, 45 min left to open the plan and set the contract)
- *   telegram.daily-evening    30 16 * * 1-5 NY       the day's card, once the session's PropReports trades are in —
- *                             + every PropReports sync after 16:15 NY (a manual / late sync sends the cards it unlocks)
+ *   telegram.daily-morning    telegram.morningTime   focus of the day + own contract (default 08:45 NY, premarket: the
+ *                             weekdays NY            previous day is synced, 45 min left to set the contract)
+ *   telegram.daily-evening    telegram.eveningTime   the day's card, once the session's PropReports trades are in
+ *                             weekdays NY            (default 16:30, never before 16:15) + every PropReports sync after
+ *                                                    that time (a manual / late sync sends the cards it unlocks)
  *   telegram.contract-alerts  after every PropReports sync, 04:00–16:15 NY, ONLY when the scheduled sync is on
  *                             (syncCron() ≠ null): «daily stop reached» / «trade limit reached», once per trader+kind+day
  *
@@ -22,11 +24,11 @@ import { addDays, isWeekend, nyDate, nyMinutes } from "../tradingDate";
 import { sendMessage } from "../telegramBot";
 import { claimOnce } from "../notifyEvents";
 import { dailyTelegramEnabled, intradayAlertsEnabled } from "./telegramGuard";
+import { EVENING_FROM_MIN, contractAlertsEnabled, eveningEnabled, eveningSendMinutes, morningEnabled } from "./telegramSchedule";
 import * as service from "./service";
 import { contractAlert, eveningMessage, isPrivateChat, morningMessage, type DayContract, type IntradayBreach, type TgMessage } from "./telegramText";
 
-/** Evening cards from 16:15 NY (the close + the first post-close sync). */
-export const EVENING_FROM_MIN = 16 * 60 + 15;
+export { EVENING_FROM_MIN };
 /** Intraday alerts: premarket 04:00 → 16:15 NY (after that the evening card carries the verdict). */
 export const ALERT_WINDOW_MIN = [4 * 60, 16 * 60 + 15] as const;
 /** Morning recipients: traded at least once in the last 14 calendar days. */
@@ -128,6 +130,7 @@ const pause = () => new Promise((r) => setTimeout(r, SEND_GAP_MS));
 
 export async function runMorningFocus(o: RunOpts = {}): Promise<Record<string, unknown>> {
   if (!dailyTelegramEnabled()) return { skipped: "bot not configured" };
+  if (!morningEnabled()) return { skipped: "off in desk settings" };
   const date = nyDate(o.now ?? new Date());
   if (await marketClosed(date)) return { skipped: "market closed", date };
   const list = await dailyRecipients({ tradedFrom: addDays(date, -ACTIVE_DAYS), tradedTo: addDays(date, -1) });
@@ -149,10 +152,12 @@ export async function runMorningFocus(o: RunOpts = {}): Promise<Record<string, u
 
 export async function runEveningCards(o: RunOpts = {}): Promise<Record<string, unknown>> {
   if (!dailyTelegramEnabled()) return { skipped: "bot not configured" };
+  if (!eveningEnabled()) return { skipped: "off in desk settings" };
   const now = o.now ?? new Date();
   const date = nyDate(now);
   if (await marketClosed(date)) return { skipped: "market closed", date };
   if (nyMinutes(now) < EVENING_FROM_MIN) return { skipped: "before the close", date };
+  if (nyMinutes(now) < eveningSendMinutes()) return { skipped: "before the evening time", date };
   const list = await dailyRecipients({ tradedFrom: date, tradedTo: date });
   const done = await existingKeys(list.map((r) => dailyKey.evening(date, r.name)));
   const n = tally();
@@ -182,6 +187,7 @@ export function intradayCheck(): IntradayCheck | null {
 
 export async function runContractAlerts(o: RunOpts & { check?: IntradayCheck | null } = {}): Promise<Record<string, unknown>> {
   if (!intradayAlertsEnabled()) return { skipped: "scheduled sync or bot not configured" };
+  if (!contractAlertsEnabled()) return { skipped: "off in desk settings" };
   const now = o.now ?? new Date();
   const date = nyDate(now);
   if (await marketClosed(date)) return { skipped: "market closed", date };

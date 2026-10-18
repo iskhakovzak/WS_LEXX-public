@@ -20,6 +20,7 @@ import { config } from "../config";
 import { registerJob, listJobs } from "./registry";
 import { syncCron } from "../lib/propreports/scheduler";
 import { dailyTelegramEnabled, intradayAlertsEnabled } from "../lib/daily/telegramGuard";
+import { contractAlertsEnabled, eveningCron, eveningEnabled, morningCron, morningEnabled } from "../lib/daily/telegramSchedule";
 
 const MIN = 60_000;
 let registered = false;
@@ -78,26 +79,28 @@ export function registerAllJobs(): void {
   });
 
   // Daily loop in the Telegram bot (lib/daily/telegramJobs.ts): production + bot token only; every send once per
-  // trader and day (notification_dedup). Morning 08:45 NY = premarket, 45 min before the open, the previous day synced.
+  // trader and day (notification_dedup). Time and on/off = desk settings (lib/daily/telegramSchedule: cron getters read
+  // every tick). Default morning 08:45 NY = premarket, 45 min before the open, the previous day synced.
   registerJob({
     name: "telegram.daily-morning",
-    cron: "45 8 * * 1-5",
+    cron: morningCron,
     timeoutMs: 10 * MIN,
-    enabled: dailyTelegramEnabled,
+    enabled: () => dailyTelegramEnabled() && morningEnabled(),
     async run({ signal }) {
       const { runMorningFocus } = await import("../lib/daily/telegramJobs");
       return runMorningFocus({ signal });
     },
   });
 
-  // Evening card: 16:30 NY (the session's trades are in after the post-close sync) + every PropReports sync after
-  // 16:15 NY, so a later / manual sync sends the cards it unlocks; a trader without trades that day gets none.
+  // Evening card: the evening time (default 16:30 NY, never before 16:15 — the session's trades are in after the
+  // post-close sync) + every PropReports sync after it, so a later / manual sync sends the cards it unlocks; a trader
+  // without trades that day gets none.
   registerJob({
     name: "telegram.daily-evening",
-    cron: "30 16 * * 1-5",
+    cron: eveningCron,
     on: ["propreports.synced"],
     timeoutMs: 10 * MIN,
-    enabled: dailyTelegramEnabled,
+    enabled: () => dailyTelegramEnabled() && eveningEnabled(),
     async run({ signal }) {
       const { runEveningCards } = await import("../lib/daily/telegramJobs");
       return runEveningCards({ signal });
@@ -109,10 +112,22 @@ export function registerAllJobs(): void {
     name: "telegram.contract-alerts",
     on: ["propreports.synced"],
     timeoutMs: 5 * MIN,
-    enabled: intradayAlertsEnabled,
+    enabled: () => intradayAlertsEnabled() && contractAlertsEnabled(),
     async run({ signal }) {
       const { runContractAlerts } = await import("../lib/daily/telegramJobs");
       return runContractAlerts({ signal });
+    },
+  });
+
+  // Discipline rewards (lib/daily/rewardsJob.ts): evening snapshots + badges for every trader of the finished day, so
+  // badges do not wait for a visit. Idempotent (trader_badges primary key); reads only the local DB.
+  registerJob({
+    name: "rewards.nightly",
+    cron: "30 18 * * 1-5",
+    timeoutMs: 20 * MIN,
+    async run({ signal }) {
+      const { runRewardsNightly } = await import("../lib/daily/rewardsJob");
+      return runRewardsNightly({ signal });
     },
   });
 

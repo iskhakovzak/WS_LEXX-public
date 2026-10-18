@@ -21,7 +21,7 @@
 import { classifyTrade, type ExecIn, type LegRole } from "../tradeStructure";
 import { sideOfRow } from "../tradeStructureStore";
 import type { SimBar, SimResult } from "./engine";
-import { PRE_OPEN, RTH_CLOSE, RTH_OPEN, etOf, riskUnitOf, type Levels, type SimTf } from "./scenario";
+import { PRE_OPEN, RTH_CLOSE, RTH_OPEN, etOf, riskUnitOf, tfSec, type IntradayTf, type Levels, type SimTf } from "./scenario";
 
 export type OwnPick = "worst" | "random" | "trade";
 export const OWN_PICKS: readonly OwnPick[] = ["worst", "random", "trade"];
@@ -160,11 +160,12 @@ export function barIndexAt(bars: readonly SimBar[], epoch: number): number | nul
   return ans < 0 ? null : ans;
 }
 
-const LEAD_BARS: Record<"1m" | "5m", number> = { "1m": 30, "5m": 6 };
+const LEAD_BARS: Record<IntradayTf, number> = { "1m": 30, "2m": 15, "5m": 6 };
 
+/** `dayBars` / `prevBars` must already be at `tf` (ownService aggregates archived 1m bars for 2m / 5m). */
 export function buildOwn(input: {
   day: string;
-  tf: "1m" | "5m";
+  tf: IntradayTf;
   dayBars: readonly SimBar[];
   prevBars: readonly SimBar[];
   prevLevels: { h: number; l: number; c: number } | null;
@@ -172,7 +173,7 @@ export function buildOwn(input: {
   firstAt: number;
   lastAt: number | null;
 }): OwnBuilt | null {
-  const sec = input.tf === "5m" ? 300 : 60;
+  const sec = tfSec(input.tf);
   const day = input.dayBars.filter((b) => etOf(b.t).date === input.day);
   const lastMin = input.lastAt != null ? etOf(input.lastAt).min : RTH_CLOSE;
   const endMin = lastMin >= RTH_CLOSE ? Math.min(20 * 60, lastMin + 15) : RTH_CLOSE;

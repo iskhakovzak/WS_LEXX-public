@@ -11,6 +11,8 @@ import { commonI18n } from "@/i18n/ns/common";
 import { personName } from "@/i18n";
 import { adminAuditI18n } from "@/i18n/ns/adminAudit";
 import { adminJobsI18n } from "@/i18n/ns/adminJobs";
+import { auditValueText, settingLabel } from "./desk-settings-text";
+import type { SettingUnit } from "./desk-settings-model";
 import RU from "@/i18n/locales/ru/adminAudit";
 
 export interface AuditLike {
@@ -105,6 +107,7 @@ export function objectLabel(targetType: string | null, targetId: string | null, 
     case "db": return t("object.db");
     case "backup": return id ? t("object.backupId", { id }) : t("object.backup");
     case "permissions": return t("object.permissions");
+    case "setting": return t("object.setting", { name: settingLabel(id) });
     case "risk_alert_log": return t("object.riskAlert", { id });
     case "risk_breach_reviews": return t("object.breachReview", { id });
     case "curator_notes": return t("object.curatorNote", { id });
@@ -263,6 +266,15 @@ export function describeAudit(e: AuditLike, tierNames?: Record<string, string>):
     case "scaling.rules.update": return { label: L("tiers"), tone: "neutral", text: t("text.rulesUpdate") };
 
     case "permissions.matrix.update": return { label: L("permissions"), tone: "purple", text: t("text.permissionsUpdate"), detail: reason };
+    case "settings.update": {
+      const setting = settingLabel(s(e.targetId));
+      const unit = (d.unit ?? null) as SettingUnit | null;
+      return {
+        label: L("settings"), tone: "purple",
+        text: d.reset ? t("text.deskSettingReset", { setting }) : t("text.deskSettingUpdate", { setting }),
+        detail: `${auditValueText(d.from, unit)} → ${auditValueText(d.to, unit)}`,
+      };
+    }
 
     case "academy.path.seed_demo": {
       const count = Array.isArray(d.created) ? d.created.length : 0;

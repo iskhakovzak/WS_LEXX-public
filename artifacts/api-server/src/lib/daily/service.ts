@@ -21,9 +21,11 @@ import {
   type WindowAnalysis,
 } from "./engine";
 import { dayPath, windowDays } from "./detectors";
-import { dayFinished, planContractOf } from "./discipline";
+import { dayFinished, planContractOf, scaleVerdict } from "./discipline";
+import { cardRewards, forgetRewards, rewardsFor } from "./rewards";
 import { deskTradersOn, inputFor, loadDailyContext, type DailyContext } from "./load";
 import { buildCostQueue } from "./costQueue";
+import { settingsChangedAt } from "../settings/store";
 import type { CostQueueItem, DailyFocus, DailyMe, EveningCard, MistakeCost, MistakeId, TierProgress } from "./types";
 
 type FocusRow = {
@@ -91,8 +93,9 @@ async function computeFocus(trader: string, date: string, ctx: DailyContext): Pr
 /** Focus for `date`, using `ctx` when it already covers the window (eveningFor shares one load). */
 async function focusWith(trader: string, date: string, ctx?: DailyContext): Promise<DailyFocus> {
   const stored = await storedFocus(trader, date);
-  // An engine row is final once it was computed after its window closed; a curator's row always wins.
-  if (stored && (stored.source === "curator" || dayFinished(stored.window_to, new Date(stored.updated_at)))) return rowToFocus(stored);
+  // An engine row is final once it was computed after its window closed — unless an admin changed the daily-focus
+  // settings after that and the day has not passed yet (then it is re-computed); a curator's row always wins.
+  if (stored && (stored.source === "curator" || (dayFinished(stored.window_to, new Date(stored.updated_at)) && !settingsNewer(stored)))) return rowToFocus(stored);
   const w = focusWindow(date);
   const c = ctx && ctx.loadedFrom <= w.from && ctx.loadedTo >= w.to ? ctx : await loadDailyContext(trader, w.from, w.to);
   const { focus, days } = await computeFocus(trader, date, c);
@@ -101,6 +104,12 @@ async function focusWith(trader: string, date: string, ctx?: DailyContext): Prom
   await saveFocus(focus, days, null, "auto");
   const again = await storedFocus(trader, date);
   return again ? rowToFocus(again) : focus;
+}
+
+/** The daily-focus settings changed after this engine row was computed, and its day is today or later. */
+function settingsNewer(r: FocusRow): boolean {
+  const changed = settingsChangedAt("daily.");
+  return !!changed && r.date >= nyDate() && new Date(changed).getTime() > new Date(r.updated_at).getTime();
 }
 
 /** Costs of every mistake kind for one trader over [from, to] (NY dates, inclusive), costliest first. */
@@ -136,7 +145,10 @@ export async function eveningFor(trader: string, date: string): Promise<EveningC
   const a = analyzeWindow(inputFor(ctx, date, date));
   const disputed = !!review?.disputed && (!review.disputed_mistake || review.disputed_mistake === focus.mistake);
   const verdict = focus.mistake ? verdictOf(a, date, focus.mistake, disputed) : null;
-  const contract = contractOf(a, date, ctx.plans?.get(date));
+  const raw = contractOf(a, date, ctx.plans?.get(date));
+  // The day's actual points on the progressive scale (streak bonus / penalty) — lib/daily/discipline.ts.
+  const scaled = raw ? await scaleVerdict(trader, raw, ctx.trades).catch(() => null) : null;
+  const contract = scaled?.contract ?? raw;
   const review1 = tradeToReview(a, date, focus.mistake);
   const totals = dayTotals(a, date);
   const day = a.tradesByDay.get(date) ?? [];
@@ -147,7 +159,10 @@ export async function eveningFor(trader: string, date: string): Promise<EveningC
     deskSameTicker: ticker && others > 0 ? { ticker, traders: others } : null,
     contract, reviewed: !!review?.reviewed_at, reviewNote: review?.note ?? null,
   };
-  if (dayFinished(date)) await saveVerdict(card).catch(() => undefined);
+  if (dayFinished(date)) {
+    if (await saveVerdict(card).catch(() => false)) forgetRewards(trader);
+    card.rewards = await cardRewards(trader, date, scaled?.streak ?? null).catch(() => null);
+  }
   return card;
 }
 
@@ -159,14 +174,16 @@ function mostTraded(tickers: readonly string[]): string | null {
   return best;
 }
 
-async function saveVerdict(card: EveningCard): Promise<void> {
+/** Stores the finished day's snapshot; true when it changed. */
+async function saveVerdict(card: EveningCard): Promise<boolean> {
   const snapshot = JSON.stringify({ trades: card.trades, netPnl: card.netPnl, focus: card.focus, contract: card.contract, tradeToReview: card.tradeToReview });
-  await pool.query(
+  const res = await pool.query(
     `INSERT INTO daily_reviews (trader, date, verdict, verdict_at) VALUES ($1, $2, $3::jsonb, now())
      ON CONFLICT (trader, date) DO UPDATE SET verdict = EXCLUDED.verdict, verdict_at = now(), updated_at = now()
       WHERE daily_reviews.verdict IS DISTINCT FROM EXCLUDED.verdict`,
     [card.trader, card.date, snapshot],
   );
+  return (res.rowCount ?? 0) > 0;
 }
 
 function nextWeekday(date: string): string {
@@ -196,7 +213,8 @@ export async function dailyMe(trader: string): Promise<DailyMe | null> {
     eveningFor(trader, eveningDate),
     tierProgress(trader, today),
   ]);
-  return { today, phase, focus, evening, progress, intraday: syncCron() != null };
+  const rewards = await rewardsFor(trader, now);
+  return { today, phase, focus, evening, progress, intraday: syncCron() != null, discipline: rewards?.discipline ?? null, badges: rewards?.badges ?? [] };
 }
 
 /** Marks the day reviewed (optional one-line note); `dispute` = «the focus hit was not a mistake». */
@@ -216,6 +234,7 @@ export async function markReviewed(trader: string, date: string, opts: { note?: 
        updated_at = now()`,
     [trader, date, note, disputedMistake != null, disputedMistake, hasNote],
   );
+  forgetRewards(trader); // the review run may have reached its badge
 }
 
 /** Desk-wide cost ranking for the curator queue (traders the viewer may see). Owned by lib/daily/costQueue.ts. */

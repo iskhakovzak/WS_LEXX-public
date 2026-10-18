@@ -17,6 +17,7 @@ import big7tickersRouter from "./big7tickers";
 import ratingsRouter from "./ratings";
 import usersRouter from "./users";
 import appErrorsRouter from "./app-errors";
+import adminSettingsRouter from "./admin-settings";
 import stockdataRouter from "./stockdata";
 import newsRouter from "./news";
 import sectorsRouter from "./sectors";
@@ -77,6 +78,7 @@ import officeStatsRouter from "./officeStats";
 import askRouter from "./ask";
 import dailyRouter from "./daily";
 import deskDayRouter from "./deskDay";
+import topRouter from "./top";
 
 const router: IRouter = Router();
 
@@ -99,6 +101,7 @@ router.use(big7tickersRouter);
 router.use(ratingsRouter);
 router.use(usersRouter);
 router.use(appErrorsRouter);
+router.use(adminSettingsRouter);
 router.use(stockdataRouter);
 router.use(newsRouter);
 router.use(sectorsRouter);
@@ -158,5 +161,6 @@ router.use(officeStatsRouter);
 router.use(askRouter);
 router.use(dailyRouter);
 router.use(deskDayRouter);
+router.use(topRouter);
 
 export default router;

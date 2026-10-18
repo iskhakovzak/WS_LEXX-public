@@ -10,11 +10,19 @@ import type { SimBar } from "./engine";
 
 export type SimMode = "intraday" | "swing";
 export type Difficulty = "easy" | "medium" | "hard";
-export type SimTf = "1m" | "5m" | "1d";
+export type SimTf = "1m" | "2m" | "5m" | "1d";
+/** Intraday timeframes (owner 2026-10-18: «на 1, 2 и 5 минутах»). 2m is always aggregated from archived 1m bars. */
+export type IntradayTf = "1m" | "2m" | "5m";
+export const INTRADAY_TFS: readonly IntradayTf[] = ["1m", "2m", "5m"];
+
+/** Bar length in seconds. */
+export function tfSec(tf: SimTf): number {
+  return tf === "1m" ? 60 : tf === "2m" ? 120 : tf === "5m" ? 300 : 86400;
+}
 
 export type IntradaySpec = {
   mode: "intraday";
-  tf: "1m" | "5m";
+  tf: IntradayTf;
   /** Minutes of the regular session to play from 9:30. */
   playMinutes: number;
   /** Day filter on |gap %| and the regular-session range in % of the open. */
@@ -63,11 +71,17 @@ export function specOf(mode: SimMode, d: Difficulty): IntradaySpec | SwingSpec {
   return mode === "intraday" ? INTRADAY_SPECS[d] : SWING_SPECS[d];
 }
 
-/** Bars the player plays at this level (for the start screen hint). */
-export function playBarsOf(mode: SimMode, d: Difficulty): number {
-  if (mode === "swing") return SWING_SPECS[d].play;
+/** The level's spec on another intraday timeframe (same minutes of the session, same day filters). */
+export function intradaySpecOf(d: Difficulty, tf?: IntradayTf | null): IntradaySpec {
   const s = INTRADAY_SPECS[d];
-  return Math.round(s.playMinutes / (s.tf === "5m" ? 5 : 1));
+  return tf && tf !== s.tf ? { ...s, tf } : s;
+}
+
+/** Bars the player plays at this level (for the start screen hint). */
+export function playBarsOf(mode: SimMode, d: Difficulty, tf?: IntradayTf | null): number {
+  if (mode === "swing") return SWING_SPECS[d].play;
+  const s = intradaySpecOf(d, tf);
+  return Math.round(s.playMinutes / (tfSec(s.tf) / 60));
 }
 
 /* ─────────────────────────── New York time ─────────────────────────── */
@@ -179,7 +193,7 @@ export function buildIntraday(input: {
   prevLevels: { h: number; l: number; c: number } | null;
   spec: IntradaySpec;
 }): BuiltScenario | null {
-  const sec = input.spec.tf === "5m" ? 300 : 60;
+  const sec = tfSec(input.spec.tf);
   const norm = (bs: readonly SimBar[]) => (sec === 60 ? [...bs] : aggregate(bs, sec));
   const day = norm(input.dayBars).filter((b) => etOf(b.t).date === input.day);
   const pre = day.filter((b) => { const m = etOf(b.t).min; return m >= PRE_OPEN && m < RTH_OPEN; });
@@ -196,7 +210,7 @@ export function buildIntraday(input: {
   }
   const startIdx = prev.length + pre.length - 1;
   // Too little to read before the open (thin premarket and no previous session archived): not a fair start.
-  if (startIdx + 1 < (sec === 60 ? 30 : 12)) return null;
+  if (startIdx + 1 < (sec === 60 ? 30 : sec === 120 ? 15 : 12)) return null;
   const endIdx = bars.length - 1;
   let pmh: number | null = null, pml: number | null = null;
   for (const b of pre) { pmh = pmh == null ? b.h : Math.max(pmh, b.h); pml = pml == null ? b.l : Math.min(pml, b.l); }
@@ -224,10 +238,11 @@ export function buildSwing(daily: readonly SimBar[], from: number, spec: SwingSp
 
 /**
  * Risk per share when the player sets no stop: an ATR of the visible bars scaled to a typical stop on that timeframe
- * (1-minute ×3, 5-minute ×1.5, daily ×1), never below 0.2% of the price.
+ * (1-minute ×3, 2-minute ×2.1 — an ATR grows ~√time, so the same stop in $ —, 5-minute ×1.5, daily ×1), never below
+ * 0.2% of the price.
  */
 export function riskUnitOf(visible: readonly SimBar[], tf: SimTf, price: number): number {
-  const k = tf === "1m" ? 3 : tf === "5m" ? 1.5 : 1;
+  const k = tf === "1m" ? 3 : tf === "2m" ? 2.1 : tf === "5m" ? 1.5 : 1;
   const rth = tf === "1d" ? visible : visible.filter((b) => { const m = etOf(b.t).min; return m >= RTH_OPEN && m < RTH_CLOSE; });
   const a = atr(rth.length >= 15 ? rth : visible, 14) ?? price * 0.005;
   const v = Math.max(a * k, price * 0.002, 0.01);
@@ -310,5 +325,6 @@ export function sample<T>(items: readonly T[], n: number, rnd: () => number = Ma
 /** Look-ahead (bars) for the «cut a winner» rule and the overtrading threshold, per mode / timeframe. */
 export function judgeOpts(mode: SimMode, tf: SimTf): { lookAhead: number; overtrading: number } {
   if (mode === "swing") return { lookAhead: 15, overtrading: 6 };
-  return { lookAhead: tf === "5m" ? 12 : 30, overtrading: 8 };
+  // Look-ahead ≈ 30–60 minutes of the session whatever the bar size.
+  return { lookAhead: tf === "5m" ? 12 : tf === "2m" ? 15 : 30, overtrading: 8 };
 }

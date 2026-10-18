@@ -4,7 +4,7 @@
  */
 import type { Candle } from "@/components/chart-engine/types";
 import { timeToLogical } from "@/components/chart-engine/lib/time";
-import type { DeskDay, DeskTakeaway, DeskTrader } from "./api";
+import type { DeskDay, DeskOffice, DeskTakeaway, DeskTrader } from "./api";
 import type { DeskMarker } from "./DeskFillsPrimitive";
 
 /**
@@ -63,10 +63,45 @@ export function pickTakeaways(list: readonly DeskTakeaway[], max = 2): DeskTakea
   return list.filter((t) => known.has(t.kind)).slice(0, max);
 }
 
-/** Traders focused by default: the viewer when they traded the ticker, otherwise nobody (everything at full strength). */
-export function defaultFocus(day: Pick<DeskDay, "traders">): string[] {
+/**
+ * Traders focused by default: the one named by the `alias` URL param (a link from the top of the day), else the viewer
+ * when they traded the ticker, otherwise nobody (everything at full strength).
+ */
+export function defaultFocus(day: Pick<DeskDay, "traders">, alias?: number | null): string[] {
+  const picked = alias != null ? day.traders.find((t) => t.alias === alias) : undefined;
+  if (picked) return [picked.name];
   const me = day.traders.find((t) => t.me);
   return me ? [me.name] : [];
+}
+
+/**
+ * The office position per chart bar (signed % of the day's peak): the value after the last minute with a fill that
+ * starts before the bar ends; `startPct` before the first fill. Works for any bar size (1m / 5m / 15m).
+ */
+export function samplePath(office: Pick<DeskOffice, "path" | "startPct">, bars: readonly Pick<Candle, "t">[], barSec: number): number[] {
+  const out: number[] = [];
+  let j = 0, cur = office.startPct;
+  for (const b of bars) {
+    const end = b.t + barSec;
+    while (j < office.path.length && office.path[j].t < end) { cur = office.path[j].pct; j++; }
+    out.push(cur);
+  }
+  return out;
+}
+
+/** Bar index range [from, to] of an ISO time window on `bars` (a window inside one bar gives that bar); null off-chart. */
+export function windowBars(bars: readonly Pick<Candle, "t">[], barSec: number, fromIso: string, toIso: string): { from: number; to: number } | null {
+  if (!bars.length) return null;
+  const a = Math.floor(Date.parse(fromIso) / 1000), b = Math.floor(Date.parse(toIso) / 1000);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  const idx = (t: number) => {
+    let lo = 0, hi = bars.length - 1, ans = -1;
+    while (lo <= hi) { const m = (lo + hi) >> 1; if (bars[m].t <= t) { ans = m; lo = m + 1; } else hi = m - 1; }
+    return ans;
+  };
+  const last = bars[bars.length - 1].t + barSec;
+  if (b < bars[0].t || a >= last) return null;
+  return { from: Math.max(0, idx(a)), to: Math.max(0, idx(b)) };
 }
 
 /**

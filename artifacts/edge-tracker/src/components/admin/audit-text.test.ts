@@ -21,6 +21,16 @@ describe("describeAudit", () => {
     expect(t.tone).toBe("down");
   });
 
+  it("describes desk settings changes with the label and formatted values", () => {
+    const x = describeAudit(entry("settings.update", { from: 0.5, to: 0.35, unit: "ratio" }, { targetType: "setting", targetId: "daily.feesShare" }));
+    expect(x.text).toBe("изменил настройку деска «Комиссии: порог ошибки»");
+    expect(x.detail).toBe("50% → 35%");
+    const r = describeAudit(entry("settings.update", { from: false, to: true, reset: true }, { targetType: "setting", targetId: "no.label.yet" }));
+    expect(r.text).toBe("вернул настройку деска «no.label.yet» к значению по умолчанию");
+    expect(r.detail).toBe("Выкл → Вкл");
+    expect(objectLabel("setting", "telegram.morningTime")).toBe("Настройка «Время утреннего фокуса»");
+  });
+
   it("marks bulk actions", () => {
     expect(describeAudit(entry("user.archive", { name: "Умид", reason: "ушёл", bulk: true })).text).toContain("(массово)");
   });

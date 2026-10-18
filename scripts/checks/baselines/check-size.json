@@ -40,7 +40,7 @@
       }
     },
     "web-functions>300": {
-      "total": 18636,
+      "total": 18241,
       "byKey": {
         "artifacts/edge-tracker/src/components/add-to-playbook.tsx#AddToPlaybookDialog": 324,
         "artifacts/edge-tracker/src/components/admin/PeoplePanel.tsx#PeoplePanel": 452,
@@ -76,7 +76,6 @@
         "artifacts/edge-tracker/src/pages/notifications.tsx#NotificationsPage": 334,
         "artifacts/edge-tracker/src/pages/offerings.tsx#OfferingsPage": 467,
         "artifacts/edge-tracker/src/pages/playbook.tsx#Playbook": 1149,
-        "artifacts/edge-tracker/src/pages/top-results.tsx#TopResultsPage": 395,
         "artifacts/edge-tracker/src/pages/trade-idea-stats.tsx#TradeIdeaStats": 372,
         "artifacts/edge-tracker/src/pages/trade-ideas.tsx#TradeIdeas": 544,
         "artifacts/edge-tracker/src/pages/trades.tsx#Trades": 748,

@@ -6,6 +6,8 @@
 import { pool } from "@workspace/db";
 import type { MoneyViewer } from "./playbookPrivacy";
 import { buildDeskDay, type DeskDay, type DeskTradeRow } from "./deskDay";
+import { deskAliases } from "./deskAliases";
+import { setting } from "./settings/registry";
 import { computeStructures, loadExtremes, type ExecRowLite, type TradeRowLite } from "./tradeStructureStore";
 
 type Queryable = { query: (typeof pool)["query"] };
@@ -15,7 +17,24 @@ export const DESK_DAY_MAX_TRADES = 400;
 
 type Row = TradeRowLite & DeskTradeRow;
 
-export async function loadDeskDay(ticker: string, date: string, viewer: MoneyViewer, q: Queryable = pool): Promise<DeskDay> {
+/** Every trader with a live trade on `date` (any ticker) — the desk-wide roster the day aliases are numbered over. */
+export async function deskRoster(date: string, q: Queryable = pool): Promise<string[]> {
+  const { rows } = await q.query(
+    `SELECT DISTINCT trader FROM trades WHERE date = $1 AND deleted_at IS NULL AND trader IS NOT NULL AND trader <> ''`,
+    [date],
+  );
+  return (rows as { trader: string }[]).map((r) => r.trader);
+}
+
+/** Day aliases of `date` over the whole desk (same numbers on every ticker and on the top of the day). */
+export async function loadDayAliases(date: string, q: Queryable = pool): Promise<Map<string, number>> {
+  return deskAliases(await deskRoster(date, q), date);
+}
+
+export async function loadDeskDay(
+  ticker: string, date: string, viewer: MoneyViewer, q: Queryable = pool,
+  hideNames: boolean = setting("privacy.hideNamesFromTraders"),
+): Promise<DeskDay> {
   const { rows } = await q.query(
     `SELECT id, trader, broker_account, ticker, date, side, stop, risk_usd, qty, result, source, context_snapshot,
             entry, exit, r_multiple, pnl, fees
@@ -26,7 +45,7 @@ export async function loadDeskDay(ticker: string, date: string, viewer: MoneyVie
     [ticker, date, DESK_DAY_MAX_TRADES],
   );
   const trades = rows as Row[];
-  if (!trades.length) return buildDeskDay(ticker, date, [], new Map(), viewer);
+  if (!trades.length) return buildDeskDay(ticker, date, [], new Map(), viewer, { hideNames });
   const ex = await q.query(
     `SELECT id, trade_id, kind, price, qty, executed_at, sort_order, order_id
        FROM trade_executions WHERE trade_id = ANY($1::int[]) ORDER BY trade_id, sort_order, id`,
@@ -35,7 +54,7 @@ export async function loadDeskDay(ticker: string, date: string, viewer: MoneyVie
   const execs = ex.rows as ExecRowLite[];
   const extremes = await loadExtremes(q, trades, execs);
   const structures = computeStructures(trades, execs, extremes);
-  return buildDeskDay(ticker, date, trades, structures, viewer);
+  return buildDeskDay(ticker, date, trades, structures, viewer, { hideNames, aliases: await loadDayAliases(date, q) });
 }
 
 export interface DeskDayCount {

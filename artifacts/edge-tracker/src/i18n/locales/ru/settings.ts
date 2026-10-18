@@ -471,6 +471,7 @@ export default {
       digest_manage_any: { label: "Дайджест за других", description: "Смотреть/менять подписку на дайджест другого участника." },
       permissions_manage: { label: "Менять права доступа", description: "Редактировать матрицу прав деска." },
       admin_errors: { label: "Ошибки приложения", description: "Пульт → Ошибки: ошибки сервера и браузера, пометка «исправлено»." },
+      settings_manage: { label: "Настройки деска", description: "Пульт → Настройки деска: пороги дневного цикла, время Telegram-рассылок, приватность." },
     },
   },
 } as const;

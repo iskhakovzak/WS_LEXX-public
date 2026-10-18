@@ -21,6 +21,7 @@ export default {
     title: "Yangi oʻyin",
     modeLabel: "Rejim",
     levelLabel: "Daraja",
+    tfLabel: "Taymfreym",
     play: "Oʻynash",
     starting: "Grafik tanlanmoqda…",
     resumeTitle: "Tugallanmagan oʻyin",

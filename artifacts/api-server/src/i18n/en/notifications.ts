@@ -40,6 +40,27 @@ export default {
     staffTitle: "{user}: {title}",
     passedBody: { one: "Result {net} over {count} trading day.", other: "Result {net} over {count} trading days." },
   },
+  discipline_badge: {
+    title: "New badge",
+    streak: {
+      title: { one: "Badge: contract kept {count} day in a row", other: "Badge: contract kept {count} days in a row" },
+      body: "Your own stop and rules, kept day after day. Streak and points are on the dashboard.",
+    },
+    reviews: {
+      title: { one: "Badge: {count} day reviewed in a row", other: "Badge: {count} days reviewed in a row" },
+      body: "Every trading day reviewed on time.",
+    },
+    focus: {
+      title: { one: "Badge: focus clean {count} day in a row", other: "Badge: focus clean {count} days in a row" },
+      body: "The mistake of your daily focus did not come back.",
+    },
+    clean_month: { title: "Badge: a month without a daily stop breach", body: "The daily stop was never reached all month." },
+    sim_first: { title: "Badge: your first own day in the simulator", body: "You replayed your own trade — that is how a mistake sticks." },
+    sim_beat: {
+      title: { one: "Badge: beat your real trade {count} time", other: "Badge: beat your real trade {count} times" },
+      body: "In the simulator your new decision did better than the real one.",
+    },
+  },
   // ── server-b (translation wave) ──
   /** Type labels and descriptions (preferences panel, chips); key = canonical type (lib/notificationCore.ts). */
   types: {
@@ -81,6 +102,7 @@ export default {
     academy_graded: { label: "Assignment graded", description: "Your mentor graded your assignment" },
     sync: { label: "PropReports sync", description: "Sync or import result: added / updated / errors" },
     sync_unmatched: { label: "Unmatched accounts", description: "The statement has accounts not linked to traders" },
+    discipline_badge: { label: "Discipline badge", description: "Contract streak, reviewed days, clean focus, a month without a stop breach, simulator" },
     system: { label: "System", description: "Service messages" },
   },
   groups: {

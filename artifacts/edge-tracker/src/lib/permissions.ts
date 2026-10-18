@@ -98,6 +98,7 @@ export const CAPABILITIES = [
   { key: "digest.manage.any", group: G.admin, team: true },
   { key: "permissions.manage", group: G.admin, adminOnly: true },
   { key: "admin.errors", group: G.admin, adminOnly: true },
+  { key: "settings.manage", group: G.admin, adminOnly: true },
 ] as const;
 
 export type Capability = (typeof CAPABILITIES)[number]["key"];

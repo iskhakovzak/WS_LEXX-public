@@ -4,7 +4,8 @@
  * Data: GET /api/day-report (net $, NY trading date, ET times from executions). Print-friendly (A4).
  */
 import * as React from "react";
-import { CalendarSearch, ChevronLeft, ChevronRight, ClipboardList, Lock, Printer } from "lucide-react";
+import { Link } from "wouter";
+import { CalendarSearch, ChevronLeft, ChevronRight, ClipboardList, Crown, Lock, Printer } from "lucide-react";
 import { EmptyState, Page, PageHeader, Panel, Pill } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,8 @@ import { comparePersonNames, personName } from "@/i18n";
 import { commonI18n } from "@/i18n/ns/common";
 import { dayReportI18n } from "@/i18n/ns/dayReport";
 import { shellI18n } from "@/i18n/ns/shell";
+import { topDayI18n } from "@/i18n/ns/topDay";
+import { links } from "@/lib/links";
 import {
   BreakdownPanel, ComparisonPanel, EquityPanel, LeaksPanel, LinksPanel, PlanPanel, StrengthsPanel, SummaryBento, TimelinePanel,
 } from "@/components/day-report/sections";
@@ -165,6 +168,11 @@ export default function DayReportPage() {
         </Button>
         {date !== today && <Button type="button" variant="ghost" size="sm" onClick={() => go(today)}>{t("page.latest")}</Button>}
         {nonTrading && <Pill tone="warn">{t("page.nonTrading")}</Pill>}
+        {!nonTrading && (
+          <Link href={links.topDay(date)} className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-primary hover:bg-primary/10">
+            <Crown className="h-4 w-4" aria-hidden="true" /> {topDayI18n.t("link")}
+          </Link>
+        )}
         {q.isFetching && <span className="text-xs text-muted-foreground" aria-live="polite">{t("page.refreshing")}</span>}
       </div>
     </PageHeader>

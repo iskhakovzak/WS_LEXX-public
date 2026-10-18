@@ -82,6 +82,8 @@ export interface EveningCard {
   contract: ContractVerdict | null;
   reviewed: boolean;
   reviewNote: string | null;
+  /** Kept-contract streak after this day and the badges earned on it (lib/daily/discipline, lib/daily/rewards). */
+  rewards?: { streak: number; badges: { id: BadgeId; target: number }[] } | null;
 }
 
 export interface TierProgressItem { metric: string; label: TextItem; actual: number | null; target: number | null; ok: boolean }
@@ -104,6 +106,44 @@ export interface DailyMe {
   progress: TierProgress | null;
   /** Intraday contract checks are live only when the PropReports scheduled sync is on (PROPREPORTS_SYNC_MINUTES). */
   intraday: boolean;
+  /** Contract streak, discipline points and level (absent on older servers / when it could not be computed). */
+  discipline?: DisciplineSummary | null;
+  /** Every badge: earned ones carry the day, locked ones the progress. */
+  badges?: BadgeState[];
+}
+
+/**
+ * Discipline rewards — follow the rules and review, never trade more (a streak for trading every day would push
+ * overtrading). Points come only from the own contract (lib/daily/discipline.ts progressive scale); badges from stored
+ * data (lib/daily/badges.ts rules, awarded once in trader_badges). All numbers are desk settings (discipline.*, rewards.*).
+ */
+export type BadgeId = "streak_1" | "streak_2" | "streak_3" | "reviews" | "focus" | "clean_month" | "sim_first" | "sim_beat";
+
+export interface DisciplineSummary {
+  /** Kept-contract days in a row up to the last finished day (days without a contract neither break nor grow it). */
+  streak: number;
+  bestStreak: number;
+  /** Bonus points the next kept day adds on top of the item points (progressive scale). */
+  nextBonus: number;
+  /** Σ contract points over the last `windowDays` trading days, and all time. */
+  points30: number;
+  pointsTotal: number;
+  windowDays: number;
+  /** Level index 0.. (texts `rewards.level.<n>`), from pointsTotal and the settings thresholds. */
+  level: number;
+  /** Threshold of the current level; of the next one (null at the top). */
+  levelFrom: number;
+  nextLevelAt: number | null;
+}
+
+export interface BadgeState {
+  id: BadgeId;
+  /** NY trading day it was earned; null = not yet. */
+  earnedOn: string | null;
+  /** The number in its name (days in a row, games …). */
+  target: number;
+  /** Where the trader is now (0..target; = target once earned). */
+  progress: number;
 }
 
 /** Curator queue row (GET /api/curator/today `byCost`): the desk's most expensive problems first. */

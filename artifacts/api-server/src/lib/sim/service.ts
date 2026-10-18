@@ -14,8 +14,8 @@ import { netPnl, signedR } from "../tradeMath";
 import { canSeeTradeMoney } from "../playbookPrivacy";
 import { orderDelta, resultOf, simulate, type OrderKind, type SimConfig, type SimEvent, type SimFill, type SimResult, type SimState, type SimTrade } from "./engine";
 import {
-  INTRADAY_SPECS, SWING_SPECS, buildIntraday, buildSwing, dayFeatures, defaultQty, fakeTimes, judgeOpts, maxNotionalOf, seriesFeatures,
-  toWire, weightedSample, type BuiltScenario, type Difficulty, type Levels, type SimMode, type SimTf, type WireBar,
+  SWING_SPECS, buildIntraday, buildSwing, dayFeatures, defaultQty, fakeTimes, intradaySpecOf, judgeOpts, maxNotionalOf, seriesFeatures,
+  tfSec, toWire, weightedSample, type BuiltScenario, type Difficulty, type IntradayTf, type Levels, type SimMode, type SimTf, type WireBar,
 } from "./scenario";
 import * as store from "./store";
 import type { GameRow } from "./store";
@@ -64,9 +64,11 @@ export function lastPlayableDay(now = new Date()): string {
 
 type Picked = BuiltScenario & { ticker: string; day: string; dayTo: string | null; tf: SimTf };
 
-async function pickIntraday(viewer: Viewer, d: Difficulty, rnd: () => number): Promise<Picked | null> {
-  const spec = INTRADAY_SPECS[d];
-  const cands = await store.intradayCandidates(lastPlayableDay(), spec.tf === "1m");
+async function pickIntraday(viewer: Viewer, d: Difficulty, rnd: () => number, tf: IntradayTf | null): Promise<Picked | null> {
+  const spec = intradaySpecOf(d, tf);
+  // 1m and 2m need archived 1-minute bars (2m is aggregated from them); 5m takes 1m or 5m days.
+  const need1m = spec.tf !== "5m";
+  const cands = await store.intradayCandidates(lastPlayableDay(), need1m);
   if (!cands.length) return null;
   const recent = await store.recentScenarioKeys(viewer.id, "intraday");
   const fresh = cands.filter((c) => !recent.has(`${c.ticker}:${c.day}`));
@@ -77,8 +79,8 @@ async function pickIntraday(viewer: Viewer, d: Difficulty, rnd: () => number): P
   let best: { p: Picked; rank: number } | null = null;
   for (const c of tried) {
     const data = await store.loadDayBars(c.ticker, c.day);
-    if (!data || (spec.tf === "1m" && data.tf !== "1m") || (data.tf !== "1m" && data.tf !== "5m")) continue;
-    const prev = await store.loadPrevDay(c.ticker, c.day, spec.tf === "1m" ? 60 : 300);
+    if (!data || (need1m && data.tf !== "1m") || (data.tf !== "1m" && data.tf !== "5m")) continue;
+    const prev = await store.loadPrevDay(c.ticker, c.day, tfSec(spec.tf));
     const built = buildIntraday({ day: c.day, dayBars: data.bars, prevBars: prev?.bars ?? [], prevLevels: prev?.levels ?? null, spec });
     if (!built) continue;
     if (built.levels.pdc == null && data.prevClose != null) built.levels.pdc = data.prevClose;
@@ -208,7 +210,7 @@ export async function snapshotOf(g: GameRow, viewer: Viewer): Promise<Snapshot> 
 }
 
 function idxForTime(g: GameRow, epoch: number): number | null {
-  const sec = g.tf === "1m" ? 60 : g.tf === "5m" ? 300 : 86400;
+  const sec = tfSec(g.tf);
   let lo = 0, hi = g.endIdx, ans = -1;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
@@ -304,9 +306,12 @@ export async function settleActive(viewer: Viewer): Promise<void> {
   if (prevId != null) await withLock(prevId, () => settle(viewer, prevId));
 }
 
-export async function createGame(viewer: Viewer, mode: SimMode, difficulty: Difficulty, rnd: () => number = Math.random): Promise<Snapshot> {
+/** `tf` (intraday only): play the level on another timeframe (1m / 2m / 5m); null = the level's own. */
+export async function createGame(
+  viewer: Viewer, mode: SimMode, difficulty: Difficulty, rnd: () => number = Math.random, tf: IntradayTf | null = null,
+): Promise<Snapshot> {
   await settleActive(viewer);
-  const picked = mode === "intraday" ? await pickIntraday(viewer, difficulty, rnd) : await pickSwing(viewer, difficulty, rnd);
+  const picked = mode === "intraday" ? await pickIntraday(viewer, difficulty, rnd, tf) : await pickSwing(viewer, difficulty, rnd);
   if (!picked) throw notFound("NOT_FOUND");
   const price = picked.bars[picked.startIdx].c;
   const g = await store.insertGame({

@@ -14,11 +14,11 @@ import { Gamepad2 } from "lucide-react";
 import { BentoGrid, EmptyState, Page, PageHeader, usePersistentState } from "@/components/ds";
 import { useAuth } from "@/contexts/auth-context";
 import { simI18n } from "@/i18n/ns/simulator";
-import { activeGameQuery, type Difficulty } from "@/components/sim/api";
+import { activeGameQuery, isIntradayTf, type Difficulty, type IntradayTf } from "@/components/sim/api";
 import { isSpeed, type Speed } from "@/components/sim/model";
 import { useSimGame } from "@/components/sim/use-sim-game";
 import { GameScreen } from "@/components/sim/game-screen";
-import { NewGamePanel, ProgressPanel, RecentGames, WeeklyBoard, isPlayMode, type PlayMode } from "@/components/sim/start-screen";
+import { LEVEL_TF, NewGamePanel, ProgressPanel, RecentGames, WeeklyBoard, isPlayMode, type PlayMode } from "@/components/sim/start-screen";
 import type { OwnStartPick } from "@/components/sim/own-start";
 
 const WHAT_IF_PARAMS = ["r", "p", "trader"];
@@ -43,7 +43,12 @@ export default function SimulatorPage() {
   const mode: PlayMode = isPlayMode(modeRaw) ? modeRaw : "intraday";
   const [ownPickRaw, setOwnPick] = usePersistentState<OwnStartPick>("sim.ownPick", "worst");
   const ownPick: OwnStartPick = ownPickRaw === "random" ? "random" : "worst";
-  const [level, setLevel] = usePersistentState<Difficulty>("sim.level", "easy");
+  const [level, setLevelRaw] = usePersistentState<Difficulty>("sim.level", "easy");
+  // Intraday bar size: prefilled from the level (easy 5m, medium / hard 1m), own mode 1m; a pick sticks until the level changes.
+  const [tfRaw, setTfRaw] = usePersistentState<IntradayTf | null>("sim.tf", null);
+  const tf: IntradayTf = isIntradayTf(tfRaw) ? tfRaw : mode === "own" ? "1m" : LEVEL_TF[level];
+  const setLevel = React.useCallback((d: Difficulty) => { setLevelRaw(d); setTfRaw(null); }, [setLevelRaw, setTfRaw]);
+  const setTf = React.useCallback((x: IntradayTf) => setTfRaw(x), [setTfRaw]);
   const [speedRaw, setSpeed] = usePersistentState<number>("sim.speed", 4);
   const speed: Speed = isSpeed(speedRaw) ? speedRaw : 4;
   const [autoStop, setAutoStop] = usePersistentState("sim.autoStop", true);
@@ -85,20 +90,20 @@ export default function SimulatorPage() {
   }, [gameId, game?.done]);
 
   const play = React.useCallback(() => {
-    if (mode === "own") void startOwn(ownPick); else void start(mode, level);
-  }, [start, startOwn, mode, level, ownPick]);
+    if (mode === "own") void startOwn(ownPick, undefined, tf); else void start(mode, level, mode === "intraday" ? tf : null);
+  }, [start, startOwn, mode, level, ownPick, tf]);
   const again = React.useCallback(() => {
     if (!game) return;
     const own = game.meta.own;
     if (own) {
       setMode("own");
-      void startOwn(own.pick === "trade" ? "worst" : own.pick);
+      void startOwn(own.pick === "trade" ? "worst" : own.pick, undefined, isIntradayTf(game.meta.tf) ? game.meta.tf : null);
       return;
     }
     setMode(game.meta.mode);
-    setLevel(game.meta.difficulty);
-    void start(game.meta.mode, game.meta.difficulty);
-  }, [game, start, startOwn, setMode, setLevel]);
+    setLevelRaw(game.meta.difficulty);
+    void start(game.meta.mode, game.meta.difficulty, isIntradayTf(game.meta.tf) ? game.meta.tf : null);
+  }, [game, start, startOwn, setMode, setLevelRaw]);
   const resume = React.useCallback(() => { if (active.data) load(active.data); }, [active.data, load]);
 
   // Enter on the start screen = Play (or Continue when a game is unfinished).
@@ -138,7 +143,7 @@ export default function SimulatorPage() {
         <>
           <BentoGrid>
             <NewGamePanel
-              mode={mode} setMode={setMode} level={level} setLevel={setLevel} ownPick={ownPick} setOwnPick={setOwnPick}
+              mode={mode} setMode={setMode} level={level} setLevel={setLevel} tf={tf} setTf={setTf} ownPick={ownPick} setOwnPick={setOwnPick}
               onPlay={play} starting={starting} active={active.data ?? null} onResume={resume}
             />
             <ProgressPanel onOpen={(id) => void open(id)} />

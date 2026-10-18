@@ -9,27 +9,40 @@
  *   structure:held_past_stop a closing leg beyond the stop by ≥ STOP_OVERSHOOT_SHARE of the risk per share; cost = the
  *                           overshoot × shares. Without a stop: a loss deeper than NO_STOP_LOSS_MULT × max risk per
  *                           trade (trader_risk_limits) — cost = the part beyond the limit
- *   day:giveback            day peak of cumulative realised net ≥ a meaningful amount, closed ≤ GIVEBACK_CLOSE_SHARE of
- *                           the peak; cost = close − peak
- *   day:fees                fees ≥ FEES_SHARE of a positive gross; cost = −(fees above a healthy FEES_HEALTHY_SHARE
- *                           of the gross) — what trading less would have saved, not every cent of commission
+ *   day:giveback            day peak of cumulative realised net ≥ a meaningful amount, closed ≤ keepShare of the
+ *                           peak; cost = close − peak
+ *   day:fees                fees ≥ share of a positive gross; cost = −(fees above a healthy healthyShare of the gross)
+ *                           — what trading less would have saved, not every cent of commission
  *   day:after_limit         trades opened after the realised net hit the daily loss limit (plan maxLossUsd, else
  *                           trader_risk_limits.daily_loss_limit); cost = their net
  *   rule:<RuleKind>         lib/rulesEval violations in the window; cost = impactNet (else costNet)
  *
+ * Day-level thresholds are desk settings (lib/settings registry, group "daily": dayThresholds()), read per call.
  * Money is net ($, pnl − |fees|); ≤ 0 = cost. Dates are New York trading days.
  */
 import { median, patternFlags, type BehaviorTrade } from "../behaviorEngine";
 import { evalRule, NO_LIMITS, type RiskLimits, type RuleRow, type TradeForRule } from "../rulesEval";
 import { computeStructures, type ExecRowLite, type TradeRowLite } from "../tradeStructureStore";
 import type { Leg, TradeStructure } from "../tradeStructure";
+import { setting } from "../settings/registry";
 import type { MistakeId, TradeRef } from "./types";
 
-export const GIVEBACK_MIN_USD = 50;
-export const GIVEBACK_CLOSE_SHARE = 0.2;
-export const FEES_SHARE = 0.5;
-export const FEES_MIN_USD = 5;
-export const FEES_HEALTHY_SHARE = 0.25;
+/** Giveback / fees thresholds now in force (admin → «Настройки деска»; the curator queue prices days the same way). */
+export function dayThresholds() {
+  return {
+    /** A giveback needs a day peak of at least this much (or the trader's median green day, whichever is larger). */
+    givebackMinUsd: setting("daily.givebackMinPeakUsd"),
+    /** …and a close at or below this share of the peak. */
+    givebackKeepShare: setting("daily.givebackKeepShare"),
+    /** Fees are a mistake from this share of a positive gross… */
+    feesShare: setting("daily.feesShare"),
+    /** …and at least this many $. */
+    feesMinUsd: setting("daily.feesMinUsd"),
+    /** Cost = the fees above this healthy share of the gross. */
+    feesHealthyShare: setting("daily.feesHealthyShare"),
+  };
+}
+
 export const STOP_OVERSHOOT_SHARE = 0.25;
 export const NO_STOP_LOSS_MULT = 1.25;
 
@@ -185,12 +198,12 @@ export function detectStructure(input: DetectInput, book: HitBook, inWindow: Map
 
 // ── day level ───────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** «Meaningful» peak for a giveback: the larger of GIVEBACK_MIN_USD and the trader's median green day. */
-export function givebackThreshold(trades: readonly BehaviorTrade[]): number {
+/** «Meaningful» peak for a giveback: the larger of the giveback minimum and the trader's median green day. */
+export function givebackThreshold(trades: readonly BehaviorTrade[], minUsd: number = dayThresholds().givebackMinUsd): number {
   const byDay = new Map<string, number>();
   for (const t of trades) if (t.net != null) byDay.set(t.date, (byDay.get(t.date) ?? 0) + t.net);
   const green = [...byDay.values()].filter((v) => v > 0);
-  return Math.max(GIVEBACK_MIN_USD, green.length ? round2(median(green)) : 0);
+  return Math.max(minUsd, green.length ? round2(median(green)) : 0);
 }
 
 export function dailyLossLimit(input: DetectInput, date: string): number | null {
@@ -200,10 +213,11 @@ export function dailyLossLimit(input: DetectInput, date: string): number | null 
 }
 
 export function detectDay(input: DetectInput, book: HitBook, days: Map<string, BehaviorTrade[]>): void {
-  const thr = givebackThreshold(input.trades);
+  const k = dayThresholds();
+  const thr = givebackThreshold(input.trades, k.givebackMinUsd);
   for (const [date, day] of days) {
     const p = dayPath(day);
-    if (p.peak >= thr && p.close <= GIVEBACK_CLOSE_SHARE * p.peak) {
+    if (p.peak >= thr && p.close <= k.givebackKeepShare * p.peak) {
       const after = day.slice(p.peakIdx + 1).filter((t) => (t.net ?? 0) < 0).sort((a, b) => (a.net ?? 0) - (b.net ?? 0));
       book.add("day:giveback", date, round2(p.close - p.peak), null);
       const h = book.days.get(date)?.get("day:giveback");
@@ -211,7 +225,7 @@ export function detectDay(input: DetectInput, book: HitBook, days: Map<string, B
     }
     let gross = 0, fees = 0;
     for (const t of day) if (t.gross != null && t.net != null) { gross += t.gross; fees += Math.max(0, t.gross - t.net); }
-    if (gross > 0 && fees >= FEES_MIN_USD && fees >= FEES_SHARE * gross) book.add("day:fees", date, round2(-(fees - FEES_HEALTHY_SHARE * gross)), null);
+    if (gross > 0 && fees >= k.feesMinUsd && fees >= k.feesShare * gross) book.add("day:fees", date, round2(-(fees - k.feesHealthyShare * gross)), null);
     const limit = dailyLossLimit(input, date);
     if (limit != null) {
       let cum = 0, hitAt: number | null = null, hitIdx = -1;

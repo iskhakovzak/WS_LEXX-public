@@ -8,7 +8,7 @@ import { fmtDate, fmtPct, fmtR, fmtRate, fmtUsd, fmtCount } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { simI18n } from "@/i18n/ns/simulator";
 import { simOwnI18n } from "@/i18n/ns/simOwn";
-import { boardQuery, myStatsQuery, ownCandidatesQuery, simApi, simKeys, type Difficulty, type FinishedGame, type SimMode, type Snapshot } from "./api";
+import { INTRADAY_TFS, boardQuery, myStatsQuery, ownCandidatesQuery, simApi, simKeys, type Difficulty, type FinishedGame, type IntradayTf, type SimMode, type Snapshot } from "./api";
 import { OwnPicker, type OwnStartPick } from "./own-start";
 
 /** What the start screen offers: the two fair modes and the own replay («Мои худшие дни»). */
@@ -17,18 +17,35 @@ export const isPlayMode = (v: unknown): v is PlayMode => v === "intraday" || v =
 
 import { personName } from "@/i18n";
 const LEVELS: Difficulty[] = ["easy", "medium", "hard"];
-const PLAY_BARS: Record<SimMode, Record<Difficulty, number>> = {
-  intraday: { easy: 78, medium: 90, hard: 180 },
-  swing: { easy: 60, medium: 100, hard: 140 },
-};
+/** Session minutes per intraday level and its own bar size (server lib/sim/scenario INTRADAY_SPECS); swing = daily bars. */
+const INTRADAY_MINUTES: Record<Difficulty, number> = { easy: 390, medium: 90, hard: 180 };
+export const LEVEL_TF: Record<Difficulty, IntradayTf> = { easy: "5m", medium: "1m", hard: "1m" };
+const SWING_BARS: Record<Difficulty, number> = { easy: 60, medium: 100, hard: 140 };
+const TF_MIN: Record<IntradayTf, number> = { "1m": 1, "2m": 2, "5m": 5 };
+export function playBars(mode: SimMode, d: Difficulty, tf: IntradayTf): number {
+  return mode === "swing" ? SWING_BARS[d] : Math.round(INTRADAY_MINUTES[d] / TF_MIN[tf]);
+}
+
+/** Bar size of an intraday / own game (1m / 2m / 5m); prefilled from the level, the player may change it. */
+function TfPicker({ tf, setTf }: { tf: IntradayTf; setTf: (tf: IntradayTf) => void }) {
+  const { t } = simI18n.useT();
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <p className="text-xs font-medium text-muted-foreground">{t("start.tfLabel")}</p>
+      <Segmented ariaLabel={t("start.tfLabel")} value={tf} onChange={setTf} options={INTRADAY_TFS.map((x) => ({ value: x, label: x }))} />
+    </div>
+  );
+}
 
 export function NewGamePanel({
-  mode, setMode, level, setLevel, ownPick, setOwnPick, onPlay, starting, active, onResume,
+  mode, setMode, level, setLevel, tf, setTf, ownPick, setOwnPick, onPlay, starting, active, onResume,
 }: {
   mode: PlayMode;
   setMode: (m: PlayMode) => void;
   level: Difficulty;
   setLevel: (d: Difficulty) => void;
+  tf: IntradayTf;
+  setTf: (tf: IntradayTf) => void;
   ownPick: OwnStartPick;
   setOwnPick: (p: OwnStartPick) => void;
   onPlay: () => void;
@@ -87,13 +104,14 @@ export function NewGamePanel({
                     <Gauge className={cn("h-4 w-4", d === "easy" ? "text-up" : d === "medium" ? "text-warn" : "text-down")} aria-hidden="true" />
                   </span>
                   <span className="text-xs text-muted-foreground">{t(`levelHint.${mode}.${d}`)}</span>
-                  <span className="mt-auto text-2xs tabular-nums text-muted-foreground">{t("bars", { count: PLAY_BARS[mode][d] })}</span>
+                  <span className="mt-auto text-2xs tabular-nums text-muted-foreground">{t("bars", { count: playBars(mode, d, on ? tf : LEVEL_TF[d]) })}</span>
                 </button>
               );
             })}
           </div>
         </div>
         )}
+        {mode !== "swing" && <TfPicker tf={tf} setTf={setTf} />}
         <Button size="lg" className="min-h-12 self-stretch text-base sm:self-start sm:px-10" onClick={onPlay} disabled={starting || ownEmpty} aria-keyshortcuts="Enter">
           <Play aria-hidden="true" /> {starting ? t("start.starting") : t("start.play")} {!starting && <Kbd className="border-white/30 bg-white/10 text-white/90">Enter</Kbd>}
         </Button>

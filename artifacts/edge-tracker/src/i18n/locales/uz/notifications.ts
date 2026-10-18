@@ -32,6 +32,7 @@ export default {
     weekly_review: { label: "Haftalik hisobot", description: "Oʻz baho yuborildi / kurator hafta tahlilini yakunladi / maqsadlar yangilandi" },
     rating: { label: "Kurator bahosi", description: "Yangi yoki oʻzgartirilgan haftalik baho" },
     rating_ack: { label: "Baho tasdiqlandi", description: "Treyder bahongizni oʻqib, tasdiqladi" },
+    discipline_badge: { label: "Intizom mukofoti", description: "Kontrakt seriyasi, tahlil qilingan kunlar, toza fokus, stop buzilmagan oy, simulyator" },
     risk_warn: { label: "Limitga yaqin", description: "Kunlik / haftalik limit yoki pasayishning ≥ 70% qismi ishlatildi" },
     risk_breach: { label: "Limit oshib ketdi", description: "Kunlik / haftalik limit yoki maks. pasayish buzildi — savdo toʻxtatiladi" },
     risk_repeat_breach: { label: "Takroriy buzilish", description: "Treyder shu haftada ikkinchi marta limitni buzdi — kurator tahlili kerak" },
