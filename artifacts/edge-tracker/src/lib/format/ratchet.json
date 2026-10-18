@@ -1,0 +1,71 @@
+{
+  "description": "Formatting ratchet (ARCHITECTURE.md §1 rule 6). Counts per file under artifacts/edge-tracker/src, comments stripped. CI fails when a file's count exceeds its baseline, a file not listed gets a match, or a rule total grows. Lower the numbers when you remove a match; never raise them.",
+  "root": "artifacts/edge-tracker/src",
+  "exclude": [
+    "lib/format/**",
+    "i18n/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**"
+  ],
+  "extensions": [
+    ".ts",
+    ".tsx"
+  ],
+  "rules": {
+    "ru-RU-literal": {
+      "pattern": "[\"'`]ru-RU[\"'`]",
+      "why": "Locale is the UI language: use fmtCount / fmtDate / fmtMonth / fmtWeekday / localeTag() from @/lib/format.",
+      "total": 0,
+      "baseline": {},
+      "notes": {
+        "*": "0 at the end of the translation wave: dictation uses localeTagFor() (notes/author-dictation.ts). Keep it at 0."
+      }
+    },
+    "new-intl": {
+      "pattern": "\\bnew Intl\\.",
+      "why": "Intl objects live in lib/format and i18n/format (cached per language). Elsewhere only fixed-locale (en-US / en-CA / en-GB) formatters that compute New York date/time PARTS, never display text.",
+      "total": 16,
+      "baseline": {
+        "components/academy/content/time.tsx": 2,
+        "components/academy/path/challenge-views.tsx": 1,
+        "components/analyst/lib.ts": 1,
+        "components/chart-engine/lib/time.ts": 1,
+        "components/dashboard/market-session.ts": 1,
+        "components/events/catalyst-math.ts": 1,
+        "components/indicators/market/format.ts": 1,
+        "components/offerings/types.ts": 1,
+        "components/trade-chart-parts/chart-utils.ts": 1,
+        "components/watchlist/lib.ts": 1,
+        "components/widgets/widget-kit.tsx": 1,
+        "lib/trading-date.ts": 1,
+        "pages/activity.tsx": 1,
+        "pages/login.tsx": 1,
+        "pages/offerings.tsx": 1
+      },
+      "notes": {
+        "*": "All 16 are en-US/en-CA/en-GB NY-time part extractors (offsets, YYYY-MM-DD, hour). Candidates to fold into lib/trading-date (nyDate / NY parts) in phase E."
+      }
+    },
+    "date-fns-locale": {
+      "pattern": "from [\"']date-fns/locale",
+      "why": "Hard-coded date-fns locales (ru) freeze the language. Text: fmtDate & co; a component that needs a date-fns Locale object uses dateFnsLocale() from @/lib/format/date-fns-locale.",
+      "total": 0,
+      "baseline": {}
+    }
+  },
+  "measured": {
+    "date": "2026-10-18",
+    "before": {
+      "ru-RU-literal": 230,
+      "new-intl": 58,
+      "filesWithRuRU": 124,
+      "date-fns-locale": 5
+    },
+    "after": {
+      "ru-RU-literal": 0,
+      "new-intl": 16,
+      "date-fns-locale": 0
+    }
+  }
+}

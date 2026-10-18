@@ -1,0 +1,15 @@
+{
+  "check": "check-i18n",
+  "mode": "total",
+  "description": "Cyrillic literals in code outside i18n dictionaries (per package total may only shrink)",
+  "metrics": {
+    "web": {
+      "total": 0,
+      "byKey": {}
+    },
+    "api": {
+      "total": 0,
+      "byKey": {}
+    }
+  }
+}

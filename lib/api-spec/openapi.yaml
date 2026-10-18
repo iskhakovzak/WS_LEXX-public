@@ -1,0 +1,2514 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Prop Trading Desk API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: trades
+    description: Trade journal entries
+  - name: events
+    description: Market events and catalysts
+  - name: research
+    description: Edge research and patterns
+  - name: dailyfeed
+    description: Daily regime feed
+  - name: discussions
+    description: Team discussion threads
+  - name: dashboard
+    description: Dashboard analytics
+  - name: big7levels
+    description: Big 7 key technical levels
+  - name: big7tickers
+    description: Big 7 / Hot Stocks watchlist tickers
+  - name: warroom
+    description: War Room sessions for high-volatility events
+  - name: psychology
+    description: Trader psychology tracking and analytics
+  - name: dailyquote
+    description: Daily multilingual trading + psychology quotes
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ── TRADES ────────────────────────────────────────────────────────────────
+  /trades:
+    get:
+      operationId: listTrades
+      tags: [trades]
+      summary: List all trades
+      parameters:
+        - name: setup
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: eventType
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: session
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: trader
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: result
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of trades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trade"
+    post:
+      operationId: createTrade
+      tags: [trades]
+      summary: Create a trade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTradeBody"
+      responses:
+        "201":
+          description: Created trade
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+
+  /trades/{id}:
+    get:
+      operationId: getTrade
+      tags: [trades]
+      summary: Get a trade by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Trade
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateTrade
+      tags: [trades]
+      summary: Update a trade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTradeBody"
+      responses:
+        "200":
+          description: Updated trade
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+    delete:
+      operationId: deleteTrade
+      tags: [trades]
+      summary: Delete a trade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── EVENTS ────────────────────────────────────────────────────────────────
+  /events:
+    get:
+      operationId: listEvents
+      tags: [events]
+      summary: List market events
+      parameters:
+        - name: ticker
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: eventType
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MarketEvent"
+    post:
+      operationId: createEvent
+      tags: [events]
+      summary: Create a market event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEventBody"
+      responses:
+        "201":
+          description: Created event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketEvent"
+
+  /events/{id}:
+    get:
+      operationId: getEvent
+      tags: [events]
+      summary: Get an event by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketEvent"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateEvent
+      tags: [events]
+      summary: Update an event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEventBody"
+      responses:
+        "200":
+          description: Updated event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketEvent"
+    delete:
+      operationId: deleteEvent
+      tags: [events]
+      summary: Delete an event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── RESEARCH ────────────────────────────────────────────────────────────
+  /research:
+    get:
+      operationId: listResearch
+      tags: [research]
+      summary: List research entries
+      responses:
+        "200":
+          description: List of research entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Research"
+    post:
+      operationId: createResearch
+      tags: [research]
+      summary: Create a research entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateResearchBody"
+      responses:
+        "201":
+          description: Created research
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Research"
+
+  /research/{id}:
+    get:
+      operationId: getResearch
+      tags: [research]
+      summary: Get research by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Research entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Research"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateResearch
+      tags: [research]
+      summary: Update a research entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateResearchBody"
+      responses:
+        "200":
+          description: Updated research
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Research"
+    delete:
+      operationId: deleteResearch
+      tags: [research]
+      summary: Delete a research entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── DAILY FEED ────────────────────────────────────────────────────────────
+  /dailyfeed:
+    get:
+      operationId: listDailyFeed
+      tags: [dailyfeed]
+      summary: List daily feed entries
+      responses:
+        "200":
+          description: List of daily feed entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyFeed"
+    post:
+      operationId: createDailyFeed
+      tags: [dailyfeed]
+      summary: Create a daily feed entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDailyFeedBody"
+      responses:
+        "201":
+          description: Created daily feed entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyFeed"
+
+  /dailyfeed/{id}:
+    get:
+      operationId: getDailyFeed
+      tags: [dailyfeed]
+      summary: Get daily feed entry by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Daily feed entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyFeed"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateDailyFeed
+      tags: [dailyfeed]
+      summary: Update daily feed entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDailyFeedBody"
+      responses:
+        "200":
+          description: Updated daily feed entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyFeed"
+    delete:
+      operationId: deleteDailyFeed
+      tags: [dailyfeed]
+      summary: Delete daily feed entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── DISCUSSIONS ─────────────────────────────────────────────────────────
+  /discussions:
+    get:
+      operationId: listDiscussions
+      tags: [discussions]
+      summary: List discussions
+      responses:
+        "200":
+          description: List of discussions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Discussion"
+    post:
+      operationId: createDiscussion
+      tags: [discussions]
+      summary: Create a discussion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDiscussionBody"
+      responses:
+        "201":
+          description: Created discussion
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Discussion"
+
+  /discussions/{id}:
+    get:
+      operationId: getDiscussion
+      tags: [discussions]
+      summary: Get discussion by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Discussion
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Discussion"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteDiscussion
+      tags: [discussions]
+      summary: Delete discussion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /discussions/{id}/comments:
+    post:
+      operationId: addComment
+      tags: [discussions]
+      summary: Add comment to discussion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentBody"
+      responses:
+        "201":
+          description: Created comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+
+  # ── DASHBOARD / ANALYTICS ─────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary metrics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/performance:
+    get:
+      operationId: getPerformanceStats
+      tags: [dashboard]
+      summary: Get performance analytics per setup/trader/event
+      responses:
+        "200":
+          description: Performance stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PerformanceStats"
+
+  /dashboard/toppatterns:
+    get:
+      operationId: getTopPatterns
+      tags: [dashboard]
+      summary: Get top performing patterns
+      responses:
+        "200":
+          description: Top patterns list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PatternStat"
+
+  /dashboard/recenttrades:
+    get:
+      operationId: getRecentTrades
+      tags: [dashboard]
+      summary: Get recent trades for dashboard feed
+      responses:
+        "200":
+          description: Recent trades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trade"
+
+  # ── BIG 7 LEVELS ─────────────────────────────────────────────────────
+  # ── WAR ROOM ──────────────────────────────────────────────────────────
+  /warroom/active:
+    get:
+      operationId: getActiveWarRoom
+      tags: [warroom]
+      summary: Get active War Room session
+      parameters:
+        - name: trader
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Active session or null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarRoomSessionWithLevels"
+
+  /warroom/sessions:
+    get:
+      operationId: listWarRoomSessions
+      tags: [warroom]
+      summary: List War Room sessions
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WarRoomSession"
+    post:
+      operationId: createWarRoomSession
+      tags: [warroom]
+      summary: Create a War Room session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWarRoomSessionBody"
+      responses:
+        "201":
+          description: Created session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarRoomSession"
+
+  /warroom/sessions/{id}:
+    patch:
+      operationId: updateWarRoomSession
+      tags: [warroom]
+      summary: Update a War Room session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWarRoomSessionBody"
+      responses:
+        "200":
+          description: Updated session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarRoomSession"
+        "404":
+          description: Not found
+
+  /warroom/sessions/{id}/levels:
+    post:
+      operationId: createWarRoomLevel
+      tags: [warroom]
+      summary: Add a level to a War Room session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWarRoomLevelBody"
+      responses:
+        "201":
+          description: Created level
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarRoomLevel"
+
+  /warroom/levels/{id}:
+    delete:
+      operationId: deleteWarRoomLevel
+      tags: [warroom]
+      summary: Delete a War Room level
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── BIG 7 LEVELS ─────────────────────────────────────────────────────
+  /big7levels:
+    get:
+      operationId: listBig7Levels
+      tags: [big7levels]
+      summary: List all Big 7 key levels
+      responses:
+        "200":
+          description: List of key levels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Big7Level"
+    post:
+      operationId: createBig7Level
+      tags: [big7levels]
+      summary: Create a Big 7 key level
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBig7LevelBody"
+      responses:
+        "201":
+          description: Created key level
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Big7Level"
+
+  /big7levels/{id}:
+    patch:
+      operationId: updateBig7Level
+      tags: [big7levels]
+      summary: Update a Big 7 key level
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBig7LevelBody"
+      responses:
+        "200":
+          description: Updated key level
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Big7Level"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteBig7Level
+      tags: [big7levels]
+      summary: Delete a Big 7 key level
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── BIG 7 TICKERS (Core + Hot Stocks) ────────────────────────────────
+  /big7/tickers:
+    get:
+      operationId: listBig7Tickers
+      tags: [big7tickers]
+      summary: List all Big 7 tickers (core + hot stocks)
+      responses:
+        "200":
+          description: List of tickers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Big7Ticker"
+    post:
+      operationId: createBig7Ticker
+      tags: [big7tickers]
+      summary: Add a single ticker to a group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBig7TickerBody"
+      responses:
+        "201":
+          description: Created ticker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Big7Ticker"
+
+  /big7/tickers/bulk:
+    post:
+      operationId: bulkCreateBig7Tickers
+      tags: [big7tickers]
+      summary: Bulk add tickers to a group (paste-friendly)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkBig7TickersBody"
+      responses:
+        "201":
+          description: Result of bulk add
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkBig7TickersResult"
+
+  /big7/tickers/{id}:
+    patch:
+      operationId: updateBig7Ticker
+      tags: [big7tickers]
+      summary: Update a Big 7 ticker
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBig7TickerBody"
+      responses:
+        "200":
+          description: Updated ticker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Big7Ticker"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteBig7Ticker
+      tags: [big7tickers]
+      summary: Delete a Big 7 ticker
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── DAILY QUOTES ─────────────────────────────────────────────────────
+  /daily-quote/today:
+    get:
+      operationId: getTodayDailyQuote
+      tags: [dailyquote]
+      summary: Get (or lazily generate) today's trilingual quote bundle
+      responses:
+        "200":
+          description: Today's quote bundle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyQuote"
+
+  /daily-quote/regenerate:
+    post:
+      operationId: regenerateDailyQuote
+      tags: [dailyquote]
+      summary: Force regenerate today's quote (admin/curator)
+      responses:
+        "200":
+          description: Regenerated quote bundle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyQuote"
+        "503":
+          description: AI generation failed
+
+  /daily-quote/recent:
+    get:
+      operationId: listRecentDailyQuotes
+      tags: [dailyquote]
+      summary: Last 14 days of quote bundles
+      responses:
+        "200":
+          description: Recent quote bundles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyQuote"
+
+  /trades/{id}/ai-review:
+    post:
+      operationId: generateAiTradeReview
+      tags: [aireview]
+      summary: Generate (or fetch cached) AI review for a trade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: force
+          in: query
+          required: false
+          schema: { type: boolean }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userKey: { type: ["string", "null"] }
+                force: { type: ["boolean", "null"] }
+      responses:
+        "201":
+          description: Review generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiTradeReview"
+        "404":
+          description: Trade not found
+        "429":
+          description: Rate limited
+    get:
+      operationId: getAiTradeReview
+      tags: [aireview]
+      summary: Get the latest AI review for a trade (no generation)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Latest review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiTradeReview"
+        "404":
+          description: No review yet
+
+  /market-conditions/dna:
+    get:
+      operationId: getMarketConditionsDna
+      tags: [insights]
+      summary: Aggregated DNA of trade outcomes by market conditions
+      parameters:
+        - in: query
+          name: userKey
+          required: false
+          schema:
+            type: string
+          description: Trader name to scope the DNA to a single user
+      responses:
+        "200":
+          description: DNA breakdown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketDna"
+
+  # ── EMOTIONAL STATE ───────────────────────────────────────────────────────
+  /emotional-state:
+    get:
+      operationId: getEmotionalStateHistory
+      tags: [psychology]
+      summary: Get emotional state history for a user
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Emotional state log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmotionalStateLog"
+    post:
+      operationId: createEmotionalState
+      tags: [psychology]
+      summary: Submit today's check-in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmotionalStateBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmotionalStateLog"
+
+  /emotional-state/today:
+    get:
+      operationId: getTodayEmotionalState
+      tags: [psychology]
+      summary: Get today's emotional check-in for a user
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Today's check-in or null
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/EmotionalStateLog"
+                  - type: "null"
+
+  # ── PSYCHOLOGY ANALYTICS ─────────────────────────────────────────────────
+  /analytics/psychology:
+    get:
+      operationId: getPsychologyAnalytics
+      tags: [psychology]
+      summary: Psychology analytics aggregates scoped to a specific trader
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Psychology analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PsychologyAnalytics"
+
+  /voice-notes:
+    get:
+      operationId: listVoiceNotes
+      tags: [psychology]
+      summary: List voice notes for a user (scoped to owner; optionally filtered by trade or daily feed)
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: tradeId
+          in: query
+          schema:
+            type: integer
+        - name: dailyFeedId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of voice notes belonging to the specified user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VoiceNote"
+        "400":
+          description: userId is required
+    post:
+      operationId: createVoiceNote
+      tags: [psychology]
+      summary: Upload an audio file, transcribe it, and create a voice note
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [audio, userId]
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                userId:
+                  type: string
+                tradeId:
+                  type: integer
+                dailyFeedId:
+                  type: integer
+                durationSec:
+                  type: integer
+      responses:
+        "201":
+          description: Voice note created with transcript
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceNote"
+        "400":
+          description: No audio file provided
+
+  /voice-notes/{id}:
+    delete:
+      operationId: deleteVoiceNote
+      tags: [psychology]
+      summary: Delete a voice note (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "400":
+          description: userId is required
+        "403":
+          description: Not authorized
+        "404":
+          description: Not found
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    # ── TRADE ──────────────────────────────────────────────────────────────
+    Trade:
+      type: object
+      properties:
+        id:
+          type: integer
+        ticker:
+          type: string
+        date:
+          type: string
+        setup:
+          type: ["string", "null"]
+        side:
+          type: ["string", "null"]
+        eventType:
+          type: ["string", "null"]
+        entry:
+          type: ["number", "null"]
+        exit:
+          type: ["number", "null"]
+        stop:
+          type: ["number", "null"]
+        result:
+          type: string
+        pnl:
+          type: ["number", "null"]
+        rMultiple:
+          type: ["number", "null"]
+        holdTime:
+          type: ["string", "null"]
+        slippage:
+          type: ["number", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        atr:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        session:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        whatWorked:
+          type: ["string", "null"]
+        whatFailed:
+          type: ["string", "null"]
+        conclusion:
+          type: ["string", "null"]
+        trader:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        eventId:
+          type: ["integer", "null"]
+        patternId:
+          type: ["integer", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        adv:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+        contextSnapshot:
+          type: ["object", "null"]
+          additionalProperties: true
+        conviction:
+          type: ["integer", "null"]
+        confidenceGrade:
+          type: ["string", "null"]
+        horizon:
+          type: ["string", "null"]
+          enum: ["intraday", "overnight", "swing", null]
+          description: Holding horizon — intraday / overnight / swing
+        exitDate:
+          type: ["string", "null"]
+          description: Exit date (YYYY-MM-DD) for multi-day holds
+        qty:
+          type: ["number", "null"]
+          description: Position size (shares)
+        fees:
+          type: ["number", "null"]
+          description: Commissions and fees ($)
+        riskUsd:
+          type: ["number", "null"]
+          description: Planned risk in $ (entry→stop × qty)
+        source:
+          type: ["string", "null"]
+          enum: ["manual", "propreports", null]
+          description: Where the numbers come from — manual journal entry or PropReports back office (null ⇒ manual)
+        externalId:
+          type: ["string", "null"]
+          description: Stable broker round-trip key (account|symbol|openedAt|side) for PropReports-sourced trades
+        brokerAccount:
+          type: ["string", "null"]
+          description: PropReports account display name the trade was synced from
+        syncedAt:
+          type: ["string", "null"]
+          description: Last time broker-owned fields were refreshed from PropReports (ISO datetime)
+        createdAt:
+          type: string
+      required:
+        - id
+        - ticker
+        - date
+        - result
+        - createdAt
+
+    CreateTradeBody:
+      type: object
+      properties:
+        ticker:
+          type: string
+        date:
+          type: string
+        setup:
+          type: ["string", "null"]
+        side:
+          type: ["string", "null"]
+        eventType:
+          type: ["string", "null"]
+        entry:
+          type: ["number", "null"]
+        exit:
+          type: ["number", "null"]
+        stop:
+          type: ["number", "null"]
+        result:
+          type: string
+        pnl:
+          type: ["number", "null"]
+        rMultiple:
+          type: ["number", "null"]
+        holdTime:
+          type: ["string", "null"]
+        slippage:
+          type: ["number", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        atr:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        session:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        whatWorked:
+          type: ["string", "null"]
+        whatFailed:
+          type: ["string", "null"]
+        conclusion:
+          type: ["string", "null"]
+        trader:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        eventId:
+          type: ["integer", "null"]
+        patternId:
+          type: ["integer", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        adv:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+        conviction:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Conviction level 1–5 (required)
+        confidenceGrade:
+          type: string
+          enum: ["A+", "A", "B", "C"]
+          description: Confidence grade — A+, A, B, or C (required)
+        horizon:
+          type: ["string", "null"]
+          enum: ["intraday", "overnight", "swing", null]
+          description: Holding horizon — intraday / overnight / swing
+        exitDate:
+          type: ["string", "null"]
+          description: Exit date (YYYY-MM-DD) for multi-day holds
+        qty:
+          type: ["number", "null"]
+          description: Position size (shares)
+        fees:
+          type: ["number", "null"]
+          description: Commissions and fees ($)
+        riskUsd:
+          type: ["number", "null"]
+          description: Planned risk in $ (entry→stop × qty)
+      required:
+        - ticker
+        - date
+        - result
+        - conviction
+        - confidenceGrade
+
+    UpdateTradeBody:
+      type: object
+      properties:
+        ticker:
+          type: ["string", "null"]
+        date:
+          type: ["string", "null"]
+        setup:
+          type: ["string", "null"]
+        side:
+          type: ["string", "null"]
+        eventType:
+          type: ["string", "null"]
+        entry:
+          type: ["number", "null"]
+        exit:
+          type: ["number", "null"]
+        stop:
+          type: ["number", "null"]
+        result:
+          type: ["string", "null"]
+        pnl:
+          type: ["number", "null"]
+        rMultiple:
+          type: ["number", "null"]
+        holdTime:
+          type: ["string", "null"]
+        slippage:
+          type: ["number", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        atr:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        session:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        whatWorked:
+          type: ["string", "null"]
+        whatFailed:
+          type: ["string", "null"]
+        conclusion:
+          type: ["string", "null"]
+        trader:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        eventId:
+          type: ["integer", "null"]
+        patternId:
+          type: ["integer", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        adv:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+        conviction:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Conviction level 1–5
+        confidenceGrade:
+          type: string
+          enum: ["A+", "A", "B", "C"]
+          description: Confidence grade — A+, A, B, or C
+        horizon:
+          type: ["string", "null"]
+          enum: ["intraday", "overnight", "swing", null]
+          description: Holding horizon — intraday / overnight / swing
+        exitDate:
+          type: ["string", "null"]
+          description: Exit date (YYYY-MM-DD) for multi-day holds
+        qty:
+          type: ["number", "null"]
+          description: Position size (shares)
+        fees:
+          type: ["number", "null"]
+          description: Commissions and fees ($)
+        riskUsd:
+          type: ["number", "null"]
+          description: Planned risk in $ (entry→stop × qty)
+
+    # ── MARKET EVENT ───────────────────────────────────────────────────────
+    MarketEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        ticker:
+          type: string
+        date:
+          type: string
+        eventType:
+          type: string
+        headline:
+          type: string
+        reaction:
+          type: ["string", "null"]
+        percentMove:
+          type: ["number", "null"]
+        volume:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        adv:
+          type: ["string", "null"]
+        atr:
+          type: ["number", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - ticker
+        - date
+        - eventType
+        - headline
+        - createdAt
+
+    CreateEventBody:
+      type: object
+      properties:
+        ticker:
+          type: string
+        date:
+          type: string
+        eventType:
+          type: string
+        headline:
+          type: string
+        reaction:
+          type: ["string", "null"]
+        percentMove:
+          type: ["number", "null"]
+        volume:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        adv:
+          type: ["string", "null"]
+        atr:
+          type: ["number", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+      required:
+        - ticker
+        - date
+        - eventType
+        - headline
+
+    UpdateEventBody:
+      type: object
+      properties:
+        ticker:
+          type: ["string", "null"]
+        date:
+          type: ["string", "null"]
+        eventType:
+          type: ["string", "null"]
+        headline:
+          type: ["string", "null"]
+        reaction:
+          type: ["string", "null"]
+        percentMove:
+          type: ["number", "null"]
+        volume:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        adv:
+          type: ["string", "null"]
+        atr:
+          type: ["number", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+
+    # ── RESEARCH ───────────────────────────────────────────────────────────
+    Research:
+      type: object
+      properties:
+        id:
+          type: integer
+        patternName:
+          type: string
+        ticker:
+          type: ["string", "null"]
+        context:
+          type: ["string", "null"]
+        marketCondition:
+          type: ["string", "null"]
+        whatWorked:
+          type: ["string", "null"]
+        whatFailed:
+          type: ["string", "null"]
+        repeatCount:
+          type: ["integer", "null"]
+        confidenceLevel:
+          type: ["integer", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        adv:
+          type: ["string", "null"]
+        atr:
+          type: ["number", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - patternName
+        - createdAt
+
+    CreateResearchBody:
+      type: object
+      properties:
+        patternName:
+          type: string
+        ticker:
+          type: ["string", "null"]
+        context:
+          type: ["string", "null"]
+        marketCondition:
+          type: ["string", "null"]
+        whatWorked:
+          type: ["string", "null"]
+        whatFailed:
+          type: ["string", "null"]
+        repeatCount:
+          type: ["integer", "null"]
+        confidenceLevel:
+          type: ["integer", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        adv:
+          type: ["string", "null"]
+        atr:
+          type: ["number", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+      required:
+        - patternName
+
+    UpdateResearchBody:
+      type: object
+      properties:
+        patternName:
+          type: ["string", "null"]
+        ticker:
+          type: ["string", "null"]
+        context:
+          type: ["string", "null"]
+        marketCondition:
+          type: ["string", "null"]
+        whatWorked:
+          type: ["string", "null"]
+        whatFailed:
+          type: ["string", "null"]
+        repeatCount:
+          type: ["integer", "null"]
+        confidenceLevel:
+          type: ["integer", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        marketCap:
+          type: ["string", "null"]
+        float:
+          type: ["string", "null"]
+        adv:
+          type: ["string", "null"]
+        atr:
+          type: ["number", "null"]
+        relativeVolume:
+          type: ["number", "null"]
+        beta:
+          type: ["number", "null"]
+        shortInterest:
+          type: ["number", "null"]
+        sector:
+          type: ["string", "null"]
+        longName:
+          type: ["string", "null"]
+
+    # ── DAILY FEED ─────────────────────────────────────────────────────────
+    DailyFeed:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+        whatWorksNow:
+          type: ["string", "null"]
+        whatDoesntWork:
+          type: ["string", "null"]
+        bestTickers:
+          type: ["string", "null"]
+        marketTheme:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - date
+        - createdAt
+
+    CreateDailyFeedBody:
+      type: object
+      properties:
+        date:
+          type: string
+        whatWorksNow:
+          type: ["string", "null"]
+        whatDoesntWork:
+          type: ["string", "null"]
+        bestTickers:
+          type: ["string", "null"]
+        marketTheme:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+      required:
+        - date
+
+    UpdateDailyFeedBody:
+      type: object
+      properties:
+        date:
+          type: ["string", "null"]
+        whatWorksNow:
+          type: ["string", "null"]
+        whatDoesntWork:
+          type: ["string", "null"]
+        bestTickers:
+          type: ["string", "null"]
+        marketTheme:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        screenshotUrl:
+          type: ["string", "null"]
+        screenshotNotes:
+          type: ["string", "null"]
+
+    # ── DISCUSSION ─────────────────────────────────────────────────────────
+    Discussion:
+      type: object
+      properties:
+        id:
+          type: integer
+        topic:
+          type: string
+        type:
+          type: ["string", "null"]
+        trader:
+          type: ["string", "null"]
+        ticker:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+        createdAt:
+          type: string
+      required:
+        - id
+        - topic
+        - createdAt
+
+    CreateDiscussionBody:
+      type: object
+      properties:
+        topic:
+          type: string
+        type:
+          type: ["string", "null"]
+        trader:
+          type: ["string", "null"]
+        ticker:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        tags:
+          type: ["string", "null"]
+      required:
+        - topic
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        discussionId:
+          type: integer
+        trader:
+          type: ["string", "null"]
+        text:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - discussionId
+        - text
+        - createdAt
+
+    CreateCommentBody:
+      type: object
+      properties:
+        trader:
+          type: ["string", "null"]
+        text:
+          type: string
+      required:
+        - text
+
+    # ── DASHBOARD ──────────────────────────────────────────────────────────
+    StreakInfo:
+      type: object
+      properties:
+        count:
+          type: integer
+        type:
+          type: string
+          enum: ["win", "loss", "none"]
+      required:
+        - count
+        - type
+
+    WeekStats:
+      type: object
+      properties:
+        count:
+          type: integer
+        pnl:
+          type: number
+        wins:
+          type: integer
+      required:
+        - count
+        - pnl
+        - wins
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalTrades:
+          type: integer
+        winRate:
+          type: number
+        totalPnl:
+          type: number
+        avgRMultiple:
+          type: number
+        todayTrades:
+          type: integer
+        todayPnl:
+          type: number
+        topSetup:
+          type: ["string", "null"]
+        topTrader:
+          type: ["string", "null"]
+        marketRegime:
+          type: ["string", "null"]
+        bestTickers:
+          type: ["string", "null"]
+        streak:
+          $ref: "#/components/schemas/StreakInfo"
+        weekStats:
+          $ref: "#/components/schemas/WeekStats"
+      required:
+        - totalTrades
+        - winRate
+        - totalPnl
+        - avgRMultiple
+        - todayTrades
+        - todayPnl
+        - streak
+        - weekStats
+
+    PerformanceStats:
+      type: object
+      properties:
+        bySetup:
+          type: array
+          items:
+            $ref: "#/components/schemas/SetupStat"
+        byTrader:
+          type: array
+          items:
+            $ref: "#/components/schemas/TraderStat"
+        byEventType:
+          type: array
+          items:
+            $ref: "#/components/schemas/EventTypeStat"
+      required:
+        - bySetup
+        - byTrader
+        - byEventType
+
+    SetupStat:
+      type: object
+      properties:
+        setup:
+          type: string
+        count:
+          type: integer
+        winRate:
+          type: number
+        avgPnl:
+          type: number
+        avgRMultiple:
+          type: number
+      required:
+        - setup
+        - count
+        - winRate
+        - avgPnl
+        - avgRMultiple
+
+    TraderStat:
+      type: object
+      properties:
+        trader:
+          type: string
+        count:
+          type: integer
+        winRate:
+          type: number
+        totalPnl:
+          type: number
+        avgRMultiple:
+          type: number
+      required:
+        - trader
+        - count
+        - winRate
+        - totalPnl
+        - avgRMultiple
+
+    EventTypeStat:
+      type: object
+      properties:
+        eventType:
+          type: string
+        count:
+          type: integer
+        winRate:
+          type: number
+        avgMove:
+          type: number
+      required:
+        - eventType
+        - count
+        - winRate
+        - avgMove
+
+    PatternStat:
+      type: object
+      properties:
+        patternName:
+          type: string
+        repeatCount:
+          type: integer
+        confidenceLevel:
+          type: integer
+        avgPnl:
+          type: number
+      required:
+        - patternName
+        - repeatCount
+        - confidenceLevel
+        - avgPnl
+
+    # ── WAR ROOM ────────────────────────────────────────────────────────
+    WarRoomSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        trader:
+          type: ["string", "null"]
+        eventName:
+          type: string
+        eventTime:
+          type: string
+        notes:
+          type: ["string", "null"]
+        checklist:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/ChecklistItem"
+        createdAt:
+          type: string
+        endedAt:
+          type: ["string", "null"]
+      required:
+        - id
+        - eventName
+        - eventTime
+        - createdAt
+
+    WarRoomSessionWithLevels:
+      type: ["object", "null"]
+      properties:
+        id:
+          type: integer
+        trader:
+          type: ["string", "null"]
+        eventName:
+          type: string
+        eventTime:
+          type: string
+        notes:
+          type: ["string", "null"]
+        checklist:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/ChecklistItem"
+        createdAt:
+          type: string
+        endedAt:
+          type: ["string", "null"]
+        levels:
+          type: array
+          items:
+            $ref: "#/components/schemas/WarRoomLevel"
+      required:
+        - id
+        - eventName
+        - eventTime
+        - createdAt
+        - levels
+
+    ChecklistItem:
+      type: object
+      properties:
+        text:
+          type: string
+        done:
+          type: boolean
+      required:
+        - text
+        - done
+
+    WarRoomLevel:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        ticker:
+          type: string
+        price:
+          type: number
+        label:
+          type: string
+        type:
+          type: string
+      required:
+        - id
+        - sessionId
+        - ticker
+        - price
+        - label
+        - type
+
+    CreateWarRoomSessionBody:
+      type: object
+      properties:
+        trader:
+          type: ["string", "null"]
+        eventName:
+          type: string
+        eventTime:
+          type: string
+        notes:
+          type: ["string", "null"]
+        checklist:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/ChecklistItem"
+      required:
+        - eventName
+        - eventTime
+
+    UpdateWarRoomSessionBody:
+      type: object
+      properties:
+        notes:
+          type: ["string", "null"]
+        checklist:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/ChecklistItem"
+        endedAt:
+          type: ["string", "null"]
+
+    CreateWarRoomLevelBody:
+      type: object
+      properties:
+        ticker:
+          type: string
+        price:
+          type: number
+        label:
+          type: string
+        type:
+          type: string
+      required:
+        - ticker
+        - price
+        - label
+        - type
+
+    # ── BIG 7 LEVELS ──────────────────────────────────────────────────────
+    Big7Level:
+      type: object
+      properties:
+        id:
+          type: integer
+        ticker:
+          type: string
+        label:
+          type: string
+        price:
+          type: number
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - ticker
+        - label
+        - price
+        - createdAt
+
+    CreateBig7LevelBody:
+      type: object
+      properties:
+        ticker:
+          type: string
+        label:
+          type: string
+        price:
+          type: number
+        notes:
+          type: ["string", "null"]
+      required:
+        - ticker
+        - label
+        - price
+
+    UpdateBig7LevelBody:
+      type: object
+      properties:
+        ticker:
+          type: ["string", "null"]
+        label:
+          type: ["string", "null"]
+        price:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+
+    Big7Ticker:
+      type: object
+      properties:
+        id:
+          type: integer
+        symbol:
+          type: string
+        exchange:
+          type: string
+        name:
+          type: string
+        groupName:
+          type: string
+        position:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - symbol
+        - exchange
+        - name
+        - groupName
+        - position
+        - createdAt
+
+    CreateBig7TickerBody:
+      type: object
+      properties:
+        symbol:
+          type: string
+        exchange:
+          type: ["string", "null"]
+        name:
+          type: ["string", "null"]
+        groupName:
+          type: ["string", "null"]
+        position:
+          type: ["integer", "null"]
+      required:
+        - symbol
+
+    UpdateBig7TickerBody:
+      type: object
+      properties:
+        symbol:
+          type: ["string", "null"]
+        exchange:
+          type: ["string", "null"]
+        name:
+          type: ["string", "null"]
+        groupName:
+          type: ["string", "null"]
+        position:
+          type: ["integer", "null"]
+
+    BulkBig7TickersBody:
+      type: object
+      properties:
+        symbols:
+          type: array
+          items:
+            type: string
+        groupName:
+          type: ["string", "null"]
+      required:
+        - symbols
+
+    BulkBig7TickersResult:
+      type: object
+      properties:
+        added:
+          type: array
+          items:
+            $ref: "#/components/schemas/Big7Ticker"
+        skipped:
+          type: array
+          items:
+            type: string
+      required:
+        - added
+        - skipped
+
+    DailyQuote:
+      type: object
+      properties:
+        id: { type: integer }
+        date: { type: string }
+        tradingRu: { type: string }
+        tradingUz: { type: string }
+        tradingUk: { type: string }
+        tradingEn: { type: ["string", "null"] }
+        tradingAuthor: { type: ["string", "null"] }
+        psychologyRu: { type: string }
+        psychologyUz: { type: string }
+        psychologyUk: { type: string }
+        psychologyEn: { type: ["string", "null"] }
+        psychologyAuthor: { type: ["string", "null"] }
+        source: { type: string }
+        createdAt: { type: string }
+      required:
+        - id
+        - date
+        - tradingRu
+        - tradingUz
+        - tradingUk
+        - psychologyRu
+        - psychologyUz
+        - psychologyUk
+        - source
+        - createdAt
+
+    AiTradeReview:
+      type: object
+      properties:
+        reviewId: { type: integer }
+        tradeId: { type: integer }
+        model: { type: string }
+        reviewText: { type: string }
+        sections:
+          type: ["object", "null"]
+          additionalProperties: true
+        inputTokens: { type: ["integer", "null"] }
+        outputTokens: { type: ["integer", "null"] }
+        costUsd: { type: ["number", "null"] }
+        generatedAt: { type: string }
+      required:
+        - reviewId
+        - tradeId
+        - model
+        - reviewText
+        - generatedAt
+
+    MarketDnaBucket:
+      type: object
+      additionalProperties: true
+
+    MarketDna:
+      type: object
+      properties:
+        currentContext:
+          type: ["object", "null"]
+          additionalProperties: true
+        byRegime:
+          type: array
+          items: { $ref: "#/components/schemas/MarketDnaBucket" }
+        byVixBucket:
+          type: array
+          items: { $ref: "#/components/schemas/MarketDnaBucket" }
+        byTrendDay:
+          type: array
+          items: { $ref: "#/components/schemas/MarketDnaBucket" }
+        bestSetupRegime:
+          type: array
+          items: { $ref: "#/components/schemas/MarketDnaBucket" }
+        worstSetupRegime:
+          type: array
+          items: { $ref: "#/components/schemas/MarketDnaBucket" }
+      required:
+        - byRegime
+        - byVixBucket
+        - byTrendDay
+        - bestSetupRegime
+        - worstSetupRegime
+
+    # ── PSYCHOLOGY ────────────────────────────────────────────────────────
+    EmotionalStateLog:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: string }
+        date: { type: string }
+        sleepWell: { type: boolean }
+        stressed: { type: boolean }
+        tilted: { type: boolean }
+        focused: { type: boolean }
+        anxious: { type: boolean }
+        revenge: { type: boolean }
+        freeText: { type: ["string", "null"] }
+        createdAt: { type: string }
+      required:
+        - id
+        - userId
+        - date
+        - sleepWell
+        - stressed
+        - tilted
+        - focused
+        - anxious
+        - revenge
+        - createdAt
+
+    CreateEmotionalStateBody:
+      type: object
+      properties:
+        userId: { type: string }
+        date: { type: string }
+        sleepWell: { type: boolean }
+        stressed: { type: boolean }
+        tilted: { type: boolean }
+        focused: { type: boolean }
+        anxious: { type: boolean }
+        revenge: { type: boolean }
+        freeText: { type: ["string", "null"] }
+      required:
+        - userId
+        - date
+
+    PsychologyAnalytics:
+      type: object
+      additionalProperties: true
+      required: []
+
+    VoiceNote:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        tradeId:
+          type: ["integer", "null"]
+        dailyFeedId:
+          type: ["integer", "null"]
+        audioUrl:
+          type: string
+        transcript:
+          type: ["string", "null"]
+        durationSec:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - userId
+        - audioUrl
+        - createdAt

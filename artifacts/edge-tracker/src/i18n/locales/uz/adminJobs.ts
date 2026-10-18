@@ -1,0 +1,46 @@
+import type { Messages } from "../../core";
+import type ru from "../ru/adminJobs";
+
+export default {
+  title: "Fon vazifalari",
+  description: "Jadval Nyu-York vaqti boʻyicha. Har bir ishga tushirish tarixga yoziladi; ikkinchi jarayon shu vazifani ishga tushirmaydi.",
+  refresh: "Vazifalar roʻyxatini yangilash",
+  empty: "Vazifalar haqida maʼlumot yoʻq",
+  unavailable: "Vazifalar roʻyxati API qayta ishga tushirilgandan keyin paydo boʻladi",
+  col: { job: "Vazifa", schedule: "Jadval", last: "Oxirgi ishga tushirish", next: "Keyingi", status: "Holat" },
+  schedule: { onEvent: "PropReports sinxronlashdan keyin", onStart: "ishga tushganda", manual: "qoʻlda" },
+  status: {
+    running: "Bajarilmoqda",
+    ok: "Muvaffaqiyatli",
+    error: "Xato",
+    timeout: "Vaqt tugadi",
+    skipped: "Oʻtkazib yuborildi",
+    never: "Hali ishga tushmagan",
+    disabled: "Oʻchirilgan",
+  },
+  failures24h: { one: "24 soatda {count} ta nosozlik", other: "24 soatda {count} ta nosozlik" },
+  duration: "{seconds} s",
+  run: "Ishga tushirish",
+  runAria: "«{job}» vazifasini hozir ishga tushirish",
+  started: "Vazifa ishga tushirildi",
+  startFailed: "Vazifani ishga tushirib boʻlmadi",
+  names: {
+    market: { sectors: "Sektorlar kuchi", "analyst-actions": "Tahlilchilar harakatlari" },
+    digest: { morning: "Ertalabki dayjest", evening: "Kechki dayjest" },
+    psychology: { "weekly-report": "Psixologiya boʻyicha haftalik hisobot" },
+    quotes: { daily: "Kun iqtibosi" },
+    db: { backup: "Maʼlumotlar bazasi zaxirasi" },
+    academy: { challenges: "Akademiya imtihonlari", readiness: "Keyingi bosqichga tayyorlik" },
+    propreports: { sync: "PropReports sinxronlash" },
+    trades: { "structure-backfill": "Savdolar tuzilmasi" },
+    jobs: { prune: "Vazifalar tarixini tozalash" },
+    candles: { archive: "Shamlar arxivi", prune: "Shamlar keshini tozalash" },
+    telegram: { "daily-morning": "Telegram: ertalabki fokus", "daily-evening": "Telegram: kun kartasi", "contract-alerts": "Telegram: shartnoma stopi" },
+  },
+  backups: {
+    description: "pg_dump har kuni Nyu-York vaqti bilan 03:15 da (kesh jadvallari maʼlumotlarisiz). 14 kunlik va 8 haftalik nusxa saqlanadi.",
+    empty: "Hozircha zaxira nusxalar yoʻq. Avtomatik zaxira har kuni Nyu-York vaqti bilan 03:15 da.",
+    emptyAdmin: "Qoʻlda yaratish mumkin: «Hozir yaratish».",
+    emptyHint: "Roʻyxat boʻsh qolsa, serverda mos versiyadagi pg_dump oʻrnatilganini tekshiring.",
+  },
+} satisfies Messages<typeof ru>;

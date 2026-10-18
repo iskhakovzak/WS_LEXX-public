@@ -1,0 +1,13 @@
+{
+  "_comment": "i18n report allowlist (edge-tracker). files: regexes on paths relative to artifacts/edge-tracker; literals: regexes on the literal text. Only for Russian-input parsers, seed data, fixtures and type tests, never for user-facing text. A single line can also be skipped with an `i18n-ignore` comment (same or previous line).",
+  "files": [
+    "^src/i18n/__typecheck__\\.ts$",
+    "^src/lib/ask/rules-ru\\.ts$",
+    "^src/lib/ask/prepare\\.ts$"
+  ],
+  "_files_reasons": {
+    "src/lib/ask/rules-ru.ts": "ASK: Russian question vocabulary (regex bodies, noise words) of the «Спроси журнал» parser — input data, never shown; EN/UZ rules live in rules-en.ts / rules-uz.ts",
+    "src/lib/ask/prepare.ts": "ASK: Russian typo vocabulary, stop words and number words for the question parser — input data, never shown"
+  },
+  "literals": []
+}

@@ -1,0 +1,878 @@
+/* Fonts (Inter + IBM Plex Mono for code) are loaded from index.html so they don't block CSS parsing. */
+
+/* ══ Geometry scale (desktop). Primitives in components/ui + components/ds.tsx follow it; pages get it for free. ══
+   RADIUS
+     full  999px  every control: Button, Input, Select trigger, Segmented (track + segments), FilterChip, Tabs,
+                  Badge/Pill/Delta, Kbd, sidebar items, header icon buttons.
+     2xl   20px   page surfaces: Panel, Card, StatCard, Toolbar, Dialog/AlertDialog, command palette, header, toasts.
+     xl    16px   second level: .tile, DataTable box, Popover/Dropdown/Select/HoverCard surfaces, Textarea,
+                  PageHeader icon, EmptyState icon.
+     item  12px   rows inside an xl surface with 4px inset (menu / select / command items) = 16 − 4 (concentric).
+     lg    14px   Tooltip, small framed icons.      md 10px / sm 6px  micro (swatches, sort-button focus ring).
+   CONTROL HEIGHTS (a row of mixed controls lines up; border included)
+     sm  32px  h-8   Button sm, icon-sm, Segmented sm, FilterChip sm, Select/Input h-8 in dense bars, menu rows.
+     md  36px  h-9   DEFAULT: Button, icon, Input, Select, Segmented, FilterChip, TabsList.
+     lg  40px  h-10  Button lg, header controls (56px header), SectionTabs (underline tabs).
+     xs  28px  min-h-7  inline quick-pick chips inside forms / sheets (suggestions, «+ тег»), never in a toolbar row.
+     Badge / Pill / Delta 22px (min-h-5.5, grows only for an inline × button), Kbd 20px, Segmented inner segment = control − 2·(1px border + inset).
+   ICONS  16px (size-4) in md/lg controls and menu rows, 14px (size-3.5) in sm controls/chips, 12px in badges.
+   SPACING  --panel-p 16→20px (Panel/Card/Dialog-less surfaces), StatCard/Tile 16/12px, Toolbar 8px,
+            --grid-gap 12→16px between cards, --page-gap 20px between sections, header 56px.
+   TABLES  header row 36px (h-9, 12px label), body rows ≈40px compact / 44px comfortable, cell padding-x 12px,
+           numeric columns right-aligned + tabular-nums (SortableTh align="right" really aligns now).
+   FOCUS   2px ring in --ring (outline for native, ring-2 for primitives), offset 2px.
+   BORDERS 1px hairlines: --glass-border on surfaces, --field-border on controls, border/50 between table rows.
+   ELEVATION  canvas < glass-panel (shadow-sm) < overlay (glass-thick + --glass-shadow) ; tiles have no shadow.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-primary-border: var(--sidebar-primary-border);
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-accent-border: var(--sidebar-accent-border);
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+
+  /* Smallest UI text (dense labels, badges). Nothing in the app goes below this. */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+
+  /* Fixed radius scale (bare `rounded` still reads --radius = 8px). */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  /* Row inside a 16px floating surface with a 4px inset (menu / select / command items). */
+  --radius-item: 12px;
+
+  /* Up / down (reference #4cc38a / #f06a6a in dark; deepened in light for 4.5:1).
+     The app colours P&L with emerald-/red-300/400 in ~600 places, so those palette
+     steps follow the theme tokens instead of fixed Tailwind hues. */
+  --color-accent-soft: hsl(var(--accent-soft));
+  /* Fill for solid accent controls with white text (buttons, active segments/pills):
+     slightly deeper than --primary so white text clears 4.5:1 in every theme. */
+  --color-primary-solid: hsl(var(--primary-solid));
+  --color-up: hsl(var(--up));
+  --color-down: hsl(var(--down));
+  /* Semantic warn / purple text-safe tones (chart-3 / chart-5 stay for charts: chart-3 fails 4.5:1 as text in light). */
+  --color-warn: hsl(var(--warn));
+  --color-purple: hsl(var(--purple));
+  /* Surface hierarchy: canvas < panel < tile (inner) < overlay. `surface-solid` = opaque panel colour for sticky headers. */
+  --color-surface-solid: hsl(var(--surface-solid));
+  --color-emerald-300: hsl(var(--up));
+  --color-emerald-400: hsl(var(--up));
+  --color-red-300: hsl(var(--down));
+  --color-red-400: hsl(var(--down));
+}
+
+:root {
+  --button-outline: rgba(0,0,0, .10);
+  --badge-outline: rgba(0,0,0, .08);
+  --opaque-button-border-intensity: -8;
+  --elevate-1: rgba(0,0,0, .03);
+  --elevate-2: rgba(0,0,0, .06);
+
+  /* ── Light ("Apple glass" light): #f0f1f4 canvas, white glass, accent #007aff (deepened for 4.5:1) ── */
+  --background: 225 15% 95%;
+  --foreground: 240 3% 14%;
+  --border: 225 10% 85%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 3% 14%;
+  --card-border: 225 10% 86%;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 240 3% 14%;
+  --sidebar-border: 225 10% 86%;
+  --sidebar-primary: 211 100% 42%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 225 14% 92%;
+  --sidebar-accent-foreground: 240 3% 14%;
+  --sidebar-ring: 211 100% 50%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 3% 14%;
+  --popover-border: 225 10% 84%;
+  --primary: 211 100% 42%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 225 14% 91%;
+  --secondary-foreground: 240 3% 14%;
+  --muted: 225 14% 91%;
+  --muted-foreground: 220 9% 30%;
+  --accent: 211 100% 42%;
+  --accent-foreground: 0 0% 100%;
+  --accent-soft: 211 100% 38%;
+  --primary-solid: 211 100% 42%;
+  --destructive: 0 62% 47%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 225 10% 80%;
+  --ring: 211 100% 50%;
+  --up: 152 60% 30%;
+  --down: 0 62% 47%;
+  --chart-1: 211 100% 45%;
+  --chart-2: 152 60% 36%;
+  --chart-3: 42 85% 45%;
+  --chart-4: 0 62% 50%;
+  --chart-5: 263 40% 55%;
+
+  /* Glass surface tokens (raw colours — used by .glass / .glass-field / .chip / .glass-panel) */
+  --glass-bg: rgb(255 255 255 / .55);
+  --glass-thick-bg: rgb(255 255 255 / .72);
+  --glass-hover-bg: rgb(255 255 255 / .70);
+  --glass-border: rgb(0 0 0 / .08);
+  --field-border: rgb(0 0 0 / .14);
+  --glass-hi: rgb(255 255 255 / .9);
+  --glass-lo: rgb(0 0 0 / .04);
+  --glass-shadow: 0 8px 32px rgb(15 23 42 / .10);
+  --glass-shadow-sm: 0 4px 18px -6px rgb(15 23 42 / .10);
+  --glass-sheen: rgb(255 255 255 / .5);
+  --glass-fallback: rgb(250 250 252 / .97);
+  --glass-sat: 160%;
+  --overlay: rgb(15 23 42 / .32);
+  --warn: 32 95% 32%;
+  --purple: 263 45% 45%;
+  --surface-solid: 0 0% 100%;
+  --tile-bg: rgb(15 23 42 / .035);
+  --tile-hover-bg: rgb(15 23 42 / .06);
+  --tile-border: rgb(0 0 0 / .06);
+
+  /* ── Motion tokens: hover/press 120, small expand 180, panels 240, sheets/modals 320. ── */
+  --ease: cubic-bezier(.2,.8,.2,1);          /* default "out" curve (enter, hover) */
+  --ease-out: cubic-bezier(.2,.8,.2,1);
+  --ease-in: cubic-bezier(.4,0,1,1);         /* exits */
+  --ease-in-out: cubic-bezier(.65,0,.35,1);  /* moves between two states */
+  --spring: cubic-bezier(.34,1.3,.64,1);
+  --dur-1: 120ms;  /* hover, press, colour */
+  --dur-2: 180ms;  /* small expand, tooltip, popover, page enter */
+  --dur-3: 240ms;  /* panel, collapse, dialog */
+  --dur-4: 320ms;  /* sheet, drawer */
+
+  /* ── Layout / spacing tokens (4/8 grid; Tailwind --spacing = 4px) ── */
+  --page-max: 1600px;          /* content max width */
+  --page-px: 1rem;             /* side gutter (16px; 24px from lg) */
+  --page-gap: 1.25rem;         /* vertical rhythm between page sections (20px) */
+  --grid-gap: 0.75rem;         /* gap between cards in a grid (12px; 16px from xl) */
+  --panel-p: 1rem;             /* panel inner padding (16px; 20px from sm) */
+  --header-h: 3.5rem;          /* app header height (56px) */
+  /* Page-level sticky elements: use `.sticky-top` (or `top-[var(--sticky-top)]` + `z-sticky` + a solid bg).
+     The header sits ABOVE the scroller (#main-content), so the offset is measured from the scroller's top edge,
+     not from the viewport: no header height here. */
+  --sticky-top: .5rem;
+  /* Opaque fill for stuck bars, so rows scrolling underneath never show through (panel colour). */
+  --sticky-bg: hsl(var(--surface-solid));
+  /* Anchor / focus scrolling inside #main-content keeps targets clear of a stuck toolbar (~48px + offset). */
+  --scroll-pad-top: 4.5rem;
+  /* Fade band at the top of the scroller (header boundary): solid for --sticky-top, then fades out. */
+  --scroll-shade-h: 1.25rem;
+
+  /* ── Layer scale (use the z-* utilities below, never raw z-50/z-[100]) ── */
+  --z-base: 0;
+  --z-raised: 1;       /* sticky first column, focused cell */
+  --z-sticky: 20;      /* sticky table headers / page toolbars inside the scroller */
+  --z-sticky-corner: 21; /* top-left cell of a table with both a sticky header and a sticky first column */
+  --z-header: 30;      /* app header */
+  --z-nav: 40;         /* sidebar, mobile tab bar */
+  --z-sheet: 50;       /* Sheet / Drawer (+ overlay) */
+  --z-modal: 60;       /* Dialog / AlertDialog (+ overlay) — above sheets: dialog from a sheet */
+  --z-popover: 70;     /* Popover / Dropdown / Select / HoverCard / ContextMenu — above modals */
+  --z-toast: 80;
+  --z-tooltip: 90;     /* always on top of everything that can host a trigger */
+  --z-skip: 100;       /* skip link */
+
+  --app-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+  --app-font-serif: Georgia, serif;
+  /* `font-mono` is used ~1.8k times for the old "terminal" look; the reference uses Inter + tabular-nums,
+     so the mono slot maps to the sans stack. Real code (code/pre/kbd/samp) keeps a monospace face. */
+  --app-font-mono: var(--app-font-sans);
+  --app-font-code: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --radius: .5rem;
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 0.06), 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --shadow: 0 2px 4px -2px rgb(0 0 0 / 0.06), 0 4px 6px -1px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 4px 6px -4px rgb(0 0 0 / 0.07), 0 10px 15px -3px rgb(0 0 0 / 0.07);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+@media (min-width: 640px) {
+  :root { --panel-p: 1.25rem; }
+}
+@media (min-width: 1024px) {
+  :root { --page-px: 1.5rem; }
+}
+@media (min-width: 1280px) {
+  :root { --grid-gap: 1rem; }
+}
+
+body {
+  background-color: hsl(var(--background));
+  background-image: linear-gradient(160deg, #f2f3f5 0%, #eceef2 100%);
+  background-attachment: fixed;
+}
+
+.dark body {
+  background-image:
+    radial-gradient(70% 50% at 15% 110%, rgb(0 191 255 / 0.07), transparent 55%),
+    radial-gradient(50% 40% at 85% -10%, rgb(0 191 255 / 0.05), transparent 50%),
+    radial-gradient(60% 50% at 50% 60%, rgb(34 195 120 / 0.04), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* ── Dark ("Apple liquid-glass dark terminal"): graphite #111214, hairlines white/12, accent #0a84ff ── */
+.dark {
+  --button-outline: rgba(255,255,255, .12);
+  --badge-outline: rgba(255,255,255, .10);
+  --opaque-button-border-intensity: 9;
+  --elevate-1: rgba(255,255,255, .04);
+  --elevate-2: rgba(255,255,255, .08);
+
+  --background: 220 8% 7%;
+  --foreground: 220 9% 93%;
+  --border: 220 4% 18%;
+  --card: 225 6% 12%;
+  --card-foreground: 220 9% 93%;
+  --card-border: 220 4% 19%;
+  --sidebar: 225 6% 10%;
+  --sidebar-foreground: 220 9% 93%;
+  --sidebar-border: 220 4% 18%;
+  --sidebar-primary: 210 100% 56%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 4% 16%;
+  --sidebar-accent-foreground: 220 9% 93%;
+  --sidebar-ring: 210 100% 63%;
+  --popover: 225 7% 12%;
+  --popover-foreground: 220 9% 93%;
+  --popover-border: 220 4% 22%;
+  --primary: 210 100% 56%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 4% 16%;
+  --secondary-foreground: 220 9% 93%;
+  --muted: 220 4% 15%;
+  --muted-foreground: 220 6% 68%;
+  --accent: 210 100% 56%;
+  --accent-foreground: 0 0% 100%;
+  --accent-soft: 210 100% 68%;
+  --primary-solid: 211 100% 45%;
+  --destructive: 0 85% 71%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 220 4% 22%;
+  --ring: 210 100% 63%;
+  --up: 151 50% 55%;
+  --down: 0 85% 71%;
+  --chart-1: 210 100% 60%;
+  --chart-2: 151 50% 55%;
+  --chart-3: 46 74% 59%;
+  --chart-4: 0 85% 71%;
+  --chart-5: 263 47% 70%;
+
+  --glass-bg: rgb(255 255 255 / .06);
+  --glass-thick-bg: rgb(255 255 255 / .10);
+  --glass-hover-bg: rgb(255 255 255 / .10);
+  --glass-border: rgb(255 255 255 / .12);
+  --field-border: rgb(255 255 255 / .12);
+  --glass-hi: rgb(255 255 255 / .18);
+  --glass-lo: rgb(0 0 0 / .20);
+  --glass-shadow: 0 8px 32px rgb(0 0 0 / .35);
+  --glass-shadow-sm: 0 6px 24px -8px rgb(0 0 0 / .45);
+  --glass-sheen: rgb(255 255 255 / .14);
+  --glass-fallback: rgb(32 33 37 / .94);
+  --glass-sat: 115%;
+  --overlay: rgb(0 0 0 / .6);
+  --warn: 38 92% 62%;
+  --purple: 263 60% 76%;
+  --surface-solid: 225 6% 11%;
+  --tile-bg: rgb(255 255 255 / .035);
+  --tile-hover-bg: rgb(255 255 255 / .06);
+  --tile-border: rgb(255 255 255 / .07);
+
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 0.4), 0 2px 4px 0 rgb(0 0 0 / 0.3);
+  --shadow: 0 2px 4px -2px rgb(0 0 0 / 0.4), 0 4px 8px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -4px rgb(0 0 0 / 0.4), 0 10px 20px -3px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.35);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+}
+
+/* Dim = lighter graphite variant of dark (html has both .dark and .dim). */
+.dim {
+  --background: 225 6% 14%;
+  --foreground: 220 12% 92%;
+  --border: 220 5% 25%;
+  --card: 225 6% 18%;
+  --card-foreground: 220 12% 92%;
+  --card-border: 220 5% 26%;
+  --sidebar: 225 6% 16%;
+  --sidebar-foreground: 220 12% 92%;
+  --sidebar-border: 220 5% 25%;
+  --sidebar-accent: 220 5% 24%;
+  --sidebar-accent-foreground: 220 12% 92%;
+  --popover: 225 6% 19%;
+  --popover-foreground: 220 12% 92%;
+  --popover-border: 220 5% 29%;
+  --secondary: 220 5% 23%;
+  --secondary-foreground: 220 12% 92%;
+  --muted: 220 5% 22%;
+  --muted-foreground: 220 8% 76%;
+  --input: 220 5% 30%;
+  /* Lighter canvas ⇒ brighter semantic text so it keeps ≥4.5:1 on panels and 12% tinted pills. */
+  --primary: 210 100% 60%;
+  --accent: 210 100% 60%;
+  --accent-soft: 210 100% 72%;
+  --up: 151 50% 58%;
+  --down: 0 85% 75%;
+  --destructive: 0 85% 75%;
+  --warn: 38 92% 66%;
+  --purple: 263 60% 80%;
+  --surface-solid: 225 6% 17%;
+  --glass-bg: rgb(255 255 255 / .065);
+  --glass-thick-bg: rgb(255 255 255 / .11);
+  --glass-fallback: rgb(44 45 50 / .95);
+  --button-outline: rgba(255,255,255, .12);
+  --badge-outline: rgba(255,255,255, .10);
+  --elevate-1: rgba(255,255,255, .035);
+  --elevate-2: rgba(255,255,255, .07);
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.25);
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 0.25), 0 2px 4px 0 rgb(0 0 0 / 0.2);
+  --shadow: 0 2px 4px -2px rgb(0 0 0 / 0.25), 0 4px 8px -1px rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 6px -4px rgb(0 0 0 / 0.25), 0 10px 20px -3px rgb(0 0 0 / 0.22);
+}
+
+/* ── Liquid-glass primitives (reference: earnings-analyzer). In `components` so utilities
+   (position, background, border overrides passed via className) still win.
+   Performance rule: backdrop blur only where content actually scrolls/moves under the surface
+   (header, popovers, tooltips). Static cards, fields, the sidebar and big sheets use no blur. ── */
+@layer components {
+  .glass,
+  .glass-thick {
+    isolation: isolate;
+    position: relative;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+  .glass::before,
+  .glass-thick::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(135deg, var(--glass-sheen), transparent 40%), var(--glass-bg);
+    box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 var(--glass-lo);
+    -webkit-backdrop-filter: blur(20px) saturate(var(--glass-sat));
+    backdrop-filter: blur(20px) saturate(var(--glass-sat));
+  }
+  .glass-thick::before {
+    background: linear-gradient(135deg, var(--glass-sheen), transparent 40%), var(--glass-thick-bg);
+    -webkit-backdrop-filter: blur(28px) saturate(var(--glass-sat));
+    backdrop-filter: blur(28px) saturate(var(--glass-sat));
+  }
+  /* Large overlay surfaces (Sheet, Dialog, Drawer): the element is already ~90% opaque, so a heavy
+     blur is invisible but costs a full-screen filter pass every frame of the slide animation. */
+  .glass-solid::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* Static glass panel (cards): same look without backdrop blur — the canvas behind cards is a
+     smooth gradient, so blurring it is invisible but costly on long lists. No pseudo element
+     either, so it never fights page-level positioning. */
+  .glass-panel {
+    background: linear-gradient(135deg, var(--glass-sheen), transparent 40%), var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 var(--glass-lo), var(--glass-shadow-sm);
+  }
+
+  /* Inner tile inside a panel (second elevation step): quiet fill + hairline, no shadow. */
+  .tile {
+    background: var(--tile-bg);
+    border: 1px solid var(--tile-border);
+    border-radius: var(--radius-xl);
+  }
+  .tile-interactive {
+    transition: background-color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+  }
+  .tile-interactive:hover {
+    background: var(--tile-hover-bg);
+    border-color: var(--glass-border);
+  }
+
+  /* Pill field (inputs, selects, segmented track). No backdrop blur: fields sit on panels. */
+  .glass-field {
+    border: 1px solid var(--field-border);
+    background: var(--glass-thick-bg);
+    box-shadow: inset 0 1px 0 var(--glass-hi);
+    border-radius: 999px;
+    transition: background-color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease);
+  }
+  .glass-field:hover:not(:disabled):not(:focus-visible) {
+    background: var(--glass-hover-bg);
+  }
+
+  .chip {
+    border: 1px solid var(--field-border);
+    background: var(--glass-bg);
+    box-shadow: inset 0 1px 0 var(--glass-hi);
+    color: hsl(var(--muted-foreground));
+    border-radius: 999px;
+    transition: background-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
+  }
+  .chip:hover {
+    background: var(--glass-hover-bg);
+    color: hsl(var(--foreground));
+  }
+  .chip:active {
+    transform: scale(.97);
+  }
+  .chip[data-active="true"],
+  .chip[aria-pressed="true"],
+  .chip[data-state="active"],
+  .chip[data-state="on"] {
+    background: hsl(var(--primary-solid));
+    color: hsl(var(--primary-foreground));
+    border-color: transparent;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .25);
+  }
+
+  .lift {
+    transition: transform var(--dur-3) var(--ease), box-shadow var(--dur-3) var(--ease), border-color var(--dur-2) var(--ease);
+  }
+  .lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px -14px rgb(0 0 0 / .45);
+  }
+  .lift:active {
+    transform: translateY(0) scale(.99);
+    transition-duration: var(--dur-1);
+  }
+
+  /* Press feedback for custom clickable surfaces (buttons get it from components/ui). */
+  .press {
+    transition: transform var(--dur-1) var(--ease);
+  }
+  .press:active:not(:disabled) {
+    transform: scale(.98);
+  }
+
+  /* 11px uppercase letter-spaced faint micro label (reference "REACTION", "% MOVE"). */
+  .micro-label {
+    font-size: var(--text-2xs);
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Page-level sticky bar (toolbars, bulk-action bars, sticky panels) inside the app scroller (#main-content).
+     Opaque by default: content scrolling underneath must never show through (override with a bg-* utility
+     only for another OPAQUE colour). z-sticky (20) < z-header (30) < z-nav (40) < overlays. */
+  .sticky-top {
+    position: sticky;
+    top: var(--sticky-top);
+    z-index: var(--z-sticky);
+    background-color: var(--sticky-bg);
+  }
+
+  /* App header: solid fallback under the glass, so it never reads as see-through. */
+  .app-header {
+    background-color: var(--glass-fallback);
+  }
+
+  /* The app's only vertical scroller (#main-content, below the header). */
+  .app-scroller {
+    scroll-padding-top: var(--scroll-pad-top);
+  }
+  /* Header boundary: once scrolled, a band at the top edge (solid for --sticky-top, then a fade) so content
+     dissolves under the header instead of being cut, and nothing peeks out above a stuck toolbar.
+     Sits just under z-sticky: stuck bars stay crisp on top of it, ordinary content goes underneath. */
+  .app-scroller::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    z-index: calc(var(--z-sticky) - 1);
+    display: block;
+    height: var(--scroll-shade-h);
+    margin: 0 -0.75rem calc(-1 * var(--scroll-shade-h));
+    pointer-events: none;
+    background: linear-gradient(to bottom, hsl(var(--background)) 0, hsl(var(--background)) var(--sticky-top), hsl(var(--background) / 0));
+    opacity: 0;
+    transition: opacity var(--dur-2) var(--ease);
+  }
+  .app-scroller[data-scrolled]::before {
+    opacity: 1;
+  }
+  @media (min-width: 768px) {
+    .app-scroller::before {
+      margin-left: calc(-1 * var(--page-px));
+      margin-right: calc(-1 * var(--page-px));
+    }
+  }
+
+  /* Skeleton with a soft sweep (static under reduced motion). Same box as the final content.
+     The sweep is a pseudo element moved with transform, so it runs on the compositor: animating
+     background-position repainted every skeleton on every frame (a table skeleton is 40+ blocks). */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: hsl(var(--foreground) / .06);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, hsl(var(--foreground) / .05) 50%, transparent 100%);
+    transform: translateX(-100%);
+    animation: skeleton-sweep 1.4s var(--ease-in-out) infinite;
+    pointer-events: none;
+  }
+
+  /* Long lists of cards/rows (not <tr>): skip layout/paint for off-screen items. */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 64px;
+  }
+}
+
+/* Layer + motion utilities (Tailwind v4 custom utilities). */
+@utility z-base { z-index: var(--z-base); }
+@utility z-raised { z-index: var(--z-raised); }
+@utility z-sticky { z-index: var(--z-sticky); }
+@utility z-sticky-corner { z-index: var(--z-sticky-corner); }
+@utility z-header { z-index: var(--z-header); }
+@utility z-nav { z-index: var(--z-nav); }
+@utility z-sheet { z-index: var(--z-sheet); }
+@utility z-modal { z-index: var(--z-modal); }
+@utility z-popover { z-index: var(--z-popover); }
+@utility z-toast { z-index: var(--z-toast); }
+@utility z-tooltip { z-index: var(--z-tooltip); }
+@utility z-skip { z-index: var(--z-skip); }
+@utility dur-1 { transition-duration: var(--dur-1); animation-duration: var(--dur-1); }
+@utility dur-2 { transition-duration: var(--dur-2); animation-duration: var(--dur-2); }
+@utility dur-3 { transition-duration: var(--dur-3); animation-duration: var(--dur-3); }
+@utility dur-4 { transition-duration: var(--dur-4); animation-duration: var(--dur-4); }
+@utility ease-smooth { transition-timing-function: var(--ease); animation-timing-function: var(--ease); }
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass::before,
+  .glass-thick::before,
+  .glass-field {
+    background: var(--glass-fallback);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .lift:hover,
+  .lift:active,
+  .chip:active,
+  .press:active {
+    transform: none;
+    transition: none;
+  }
+  .skeleton::after {
+    animation: none;
+    display: none;
+  }
+}
+
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* Keyboard focus must always be visible (components may add their own ring on top). */
+  :where(a, button, [role="button"], [role="tab"], [role="menuitem"], [role="option"], [role="switch"], [role="checkbox"], summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary,
+  label[for] {
+    cursor: pointer;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased text-foreground;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "tnum" 1, "cv11" 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  code, kbd, pre, samp {
+    font-family: var(--app-font-code);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.35);
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer utilities {
+  input[type="search"]::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+
+  .no-default-hover-elevate {}
+  .no-default-active-elevate {}
+
+  .toggle-elevate::before,
+  .toggle-elevate-2::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: -1;
+  }
+
+  .toggle-elevate.toggle-elevated::before {
+    background-color: var(--elevate-2);
+  }
+
+  .border.toggle-elevate::before {
+    inset: -1px;
+  }
+
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
+    position: relative;
+    z-index: 0;
+  }
+
+  .hover-elevate:not(.no-default-hover-elevate)::after,
+  .active-elevate:not(.no-default-active-elevate)::after,
+  .hover-elevate-2:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:not(.no-default-active-elevate)::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: var(--z-raised);
+  }
+
+  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-1);
+  }
+
+  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-2);
+  }
+
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
+    inset: -1px;
+  }
+
+  .number-tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Hide scrollbars but keep scrolling (tab strips, segmented overflow). */
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Fixed bottom bars on phones: keep clear of the home indicator. */
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(-5px); }
+  60% { transform: translateX(5px); }
+  75% { transform: translateX(-3px); }
+  90% { transform: translateX(3px); }
+}
+
+@keyframes skeleton-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* OS «reduce motion»: every CSS animation/transition ends instantly (framer-motion follows the same setting
+   through <MotionConfig reducedMotion="user"> in App.tsx). */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Mobile & Safe Area ──────────────────────────────────────────── */
+
+/* Prevent layout jumps from on-screen keyboard on iOS */
+html {
+  height: -webkit-fill-available;
+}
+body {
+  min-height: -webkit-fill-available;
+}
+
+/* Remove 300ms tap delay everywhere */
+* {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Keep scroll smooth on iOS */
+.overflow-auto, .overflow-y-auto, .overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area utilities (iPhone notch / Dynamic Island / home bar) */
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left   { padding-left:   env(safe-area-inset-left); }
+.safe-right  { padding-right:  env(safe-area-inset-right); }
+
+/* Prevent iOS text size adjustment */
+body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Hide scrollbars on mobile to save space (keep functional) */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}

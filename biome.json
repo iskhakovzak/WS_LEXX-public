@@ -1,0 +1,108 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true, "defaultBranch": "main" },
+  "files": {
+    "includes": [
+      "artifacts/**",
+      "lib/**",
+      "scripts/**",
+      "*.mjs",
+      "!**/dist",
+      "!**/generated",
+      "!**/node_modules",
+      "!**/*.json",
+      "!**/*.css",
+      "!**/*.html",
+      "!**/*.md",
+      "!**/*.py",
+      "!artifacts/binance-monitor",
+      "!artifacts/**/.replit-artifact",
+      "!artifacts/api-server/src/lib/propreports/__fixtures__",
+      "!scripts/backups"
+    ]
+  },
+  "formatter": { "enabled": false, "lineWidth": 140, "indentStyle": "space", "indentWidth": 2 },
+  "javascript": { "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all" } },
+  "assist": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "none",
+      "a11y": {
+        "useButtonType": "warn",
+        "useAltText": "warn",
+        "useValidAnchor": "warn",
+        "useAnchorContent": "warn",
+        "useIframeTitle": "warn",
+        "useValidAriaProps": "warn",
+        "useValidAriaRole": "warn",
+        "useAriaPropsForRole": "warn",
+        "noPositiveTabindex": "warn",
+        "noRedundantAlt": "warn",
+        "useKeyWithClickEvents": "warn"
+      },
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnusedImports": "warn",
+        "useExhaustiveDependencies": "off",
+        "useHookAtTopLevel": "error",
+        "noUnreachable": "warn",
+        "noSwitchDeclarations": "warn",
+        "noConstAssign": "error",
+        "noInvalidUseBeforeDeclaration": "warn",
+        "noChildrenProp": "warn",
+        "useJsxKeyInIterable": "warn"
+      },
+      "suspicious": {
+        "noDoubleEquals": "warn",
+        "noFallthroughSwitchClause": "warn",
+        "noAsyncPromiseExecutor": "error",
+        "noDebugger": "error",
+        "noDuplicateObjectKeys": "error",
+        "noDuplicateCase": "error",
+        "noSelfCompare": "warn",
+        "noConsole": { "level": "warn", "options": { "allow": ["warn", "error", "info"] } }
+      },
+      "security": { "noDangerouslySetInnerHtml": "error", "noGlobalEval": "error" },
+      "style": {
+        "noRestrictedGlobals": "off"
+      },
+      "nursery": { "noFloatingPromises": "warn" }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["artifacts/edge-tracker/src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "warn",
+              "options": {
+                "deniedGlobals": {
+                  "fetch": "Use the shared HTTP client from src/lib/api (http.ts) instead of calling fetch directly. Streams and blobs go through http.raw()."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["artifacts/edge-tracker/src/lib/api/**", "artifacts/edge-tracker/src/lib/install-fetch-auth.ts", "artifacts/edge-tracker/src/contexts/auth-context.tsx", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**", "**/test-setup.ts"],
+      "linter": { "rules": { "style": { "noRestrictedGlobals": "off" } } }
+    },
+    {
+      "includes": ["artifacts/edge-tracker/src/components/chart-engine/primitives/**"],
+      "linter": { "rules": { "correctness": { "useHookAtTopLevel": "off" } } }
+    },
+    {
+      "includes": ["artifacts/edge-tracker/src/components/ui/chart.tsx"],
+      "linter": { "rules": { "security": { "noDangerouslySetInnerHtml": "off" } } }
+    },
+    {
+      "includes": ["scripts/**", "artifacts/*/scripts/**", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**", "artifacts/*/build.mjs"],
+      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+    }
+  ]
+}

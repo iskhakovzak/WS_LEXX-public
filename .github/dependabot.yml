@@ -1,0 +1,57 @@
+# Dependency updates (ARCHITECTURE.md §6: Dependabot, not Renovate).
+# - Security updates: opened immediately (cooldown does not apply to them), grouped into one PR.
+# - Version updates: weekly, only releases at least 14 days old (matches the "pin versions ≥ 2 weeks old" rule),
+#   minor/patch grouped; majors are planned by hand (phase F), so they are ignored here.
+version: 2
+updates:
+  - package-ecosystem: npm # pnpm workspace + catalog in pnpm-workspace.yaml
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Tashkent
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    cooldown:
+      default-days: 14
+    groups:
+      security:
+        applies-to: security-updates
+        patterns: ["*"]
+      radix:
+        patterns: ["@radix-ui/*"]
+        update-types: [minor, patch]
+      tanstack:
+        patterns: ["@tanstack/*"]
+        update-types: [minor, patch]
+      vite-vitest-tailwind:
+        patterns: ["vite", "vitest", "@vitejs/*", "tailwindcss", "@tailwindcss/*"]
+        update-types: [minor, patch]
+      lint-tooling:
+        patterns: ["@biomejs/biome", "eslint", "eslint-plugin-*", "@typescript-eslint/*", "@tanstack/eslint-plugin-query", "dependency-cruiser", "knip"]
+        update-types: [minor, patch]
+      types:
+        patterns: ["@types/*"]
+        update-types: [minor, patch]
+      minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      # orval is frozen on the current generated paths (ARCHITECTURE.md §6); codegen is a reviewed manual step
+      - dependency-name: "orval"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Tashkent
+    cooldown:
+      default-days: 14
+    groups:
+      actions:
+        patterns: ["*"]

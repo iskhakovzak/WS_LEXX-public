@@ -1,0 +1,68 @@
+import type { Messages } from "../../core";
+import type ru from "../ru/simOwn";
+
+export default {
+  mode: "My worst days",
+  modeHint: "One of your losing trades on the real candles of that day. Play up to your entry and decide again",
+  pickLabel: "Which day",
+  pick: {
+    worst: "Worst of {days} days",
+    worstHint: "Your biggest loss you have not replayed yet",
+    random: "Random from my losses",
+    randomHint: "Trades with mistakes come up more often",
+  },
+  next: "Up next: {ticker} · {date} · {net}",
+  ready: { one: "{count} losing trade ready to replay", other: "{count} losing trades ready to replay" },
+  none: "Nothing to replay yet: you need your own losing intraday trades on days with saved 1-minute candles",
+  fair: "The ticker and the date are known — it is your trade. These games stay out of the weekly board and the overall progress",
+  how: {
+    a: "Bars play up to the moment of your real entry and stop there",
+    b: "Decide again: entry, size, stop — or skip it (Space)",
+    c: "Size, fees and 1R are those of the real trade",
+    d: "At the end your real trade sits next to the simulator decision",
+  },
+  banner: {
+    pill: "Your trade · {ticker} · {date}",
+    lead: "Bars are playing up to your entry. You may enter earlier too",
+    decision: "This is where you entered. Decide again: entry, size, stop — or skip it",
+    after: "The day now plays on as it did",
+  },
+  chartEntry: "Your entry",
+  hudRiskUnit: "1R = {value} per share — as in the real trade",
+  hudFee: "Your trade's fee: {value} per share",
+  result: {
+    title: "Then and now",
+    real: "What you did",
+    sim: "In the simulator",
+    trade: "{side} {qty} · {entry} → {exit}",
+    skipped: "Stayed out",
+    simTrades: { one: "{count} trade", other: "{count} trades" },
+    diff: {
+      better: "{value} better than the real trade",
+      worse: "{value} worse than the real trade",
+      same: "About the same as real ({value})",
+      skipped: "Skipping would have saved {value}",
+    },
+    risk: "1R = {value} · {source}",
+    riskSource: { trade: "risk of the real trade", stop: "from the real trade's stop", atr: "ATR-based — the trade had no risk set" },
+    mistakeTitle: "What went wrong in the real trade",
+    noMistake: "No clear mistake found in the real trade",
+    again: "Another of my days",
+    deskDay: "How the desk traded this day",
+    toStart: "Back to modes",
+    legsTitle: "Your real trade",
+    cols: { role: "Action", time: "Time ET", price: "Price", qty: "Shares" },
+    deskTitle: "Your {ticker} trades that day",
+  },
+  progressLabel: "My day",
+  progressSummary: "Days replayed: {games} · better than real: {better} · {diff}",
+  errors: {
+    noBars: "No saved 1-minute candles for this trade",
+    notReplayable: "This trade cannot be replayed: it must be your own losing intraday trade with that day's candles",
+    noOwnTrades: "Nothing to replay yet: no losing trades of yours with candles",
+  },
+  sheet: {
+    replay: "Replay this day",
+    replayHint: "Simulator: play up to your entry and decide again",
+  },
+} satisfies Messages<typeof ru>;

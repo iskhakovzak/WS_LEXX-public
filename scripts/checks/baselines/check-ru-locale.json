@@ -1,0 +1,20 @@
+{
+  "check": "check-ru-locale",
+  "mode": "total",
+  "description": "\"ru-RU\" string literals outside src/i18n and src/lib/format",
+  "metrics": {
+    "web": {
+      "total": 0,
+      "byKey": {}
+    },
+    "api": {
+      "total": 4,
+      "byKey": {
+        "artifacts/api-server/src/lib/challengeEngine.ts": 1,
+        "artifacts/api-server/src/lib/feedStream.ts": 1,
+        "artifacts/api-server/src/lib/promotionEngine.ts": 1,
+        "artifacts/api-server/src/routes/academy-path.ts": 1
+      }
+    }
+  }
+}

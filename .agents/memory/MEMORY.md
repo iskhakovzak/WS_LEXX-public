@@ -1,0 +1,5 @@
+- [Options chain data source](options-chain-source.md) — Yahoo Finance v7/options needs crumb auth and returns 401 from Replit IP; use NASDAQ free API instead
+- [Frontend auth headers](frontend-auth-pattern.md) — installFetchAuth() in main.tsx patches all fetch('/api/*') calls with JWT automatically; no manual Authorization header needed in calculator.tsx or other components
+- [SEC EDGAR 424B5 parsing](edgar-424b5-parsing.md) — ATM detection, debt filtering, underwriter extraction from SEC 424B4/424B5 filings
+- [Offerings Watch page](offerings-watch.md) — day-based offering watch: NASDAQ IPO calendar + SEC EDGAR 424B4/424B5, Yahoo Finance enrichment, rating algorithm
+- [Offerings Watch D-1 search + price accuracy](offerings-d1-fixes.md) — EDGAR must search D-1→D; dedup keep first (>=→>); "Public offering price $ X" before "$ X per share"; J.P. Morgan periods in UW patterns

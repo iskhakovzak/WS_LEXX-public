@@ -1,0 +1,43 @@
+import type { Messages } from "../core";
+import type ru from "../ru/calendar";
+
+export default {
+  name: {
+    newYear: "Yangi yil",
+    mlk: "Martin Lyuter King kuni",
+    presidents: "Prezidentlar kuni",
+    goodFriday: "Muqaddas juma",
+    memorial: "Xotira kuni",
+    juneteenth: "Juneteenth",
+    juneteenthObserved: "Juneteenth (koʻchirilgan)",
+    independenceObserved: "Mustaqillik kuni (koʻchirilgan)",
+    labor: "Mehnat kuni",
+    thanksgiving: "Shukrona kuni",
+    afterThanksgiving: "Shukrona kunidan keyingi kun",
+    christmasEve: "Rojdestvo arafasi",
+    christmas: "Rojdestvo",
+    christmasObserved: "Rojdestvo (koʻchirilgan)",
+    fomc: "FOMC yigʻilishi",
+    fomcDecision: "FOMC yigʻilishi (qaror kuni)",
+    fomcSep: "FOMC yigʻilishi + SEP",
+    fomcSepDecision: "FOMC yigʻilishi + SEP (qaror kuni)",
+    cpi: "CPI eʼloni",
+    ppi: "PPI eʼloni",
+    nfp: "NFP bandlik hisoboti",
+    opex: "Oylik ekspiratsiya (OPEX)",
+    quad: "Quad witching",
+    monthEnd: "Oy oxiridagi rebalans",
+  },
+  desc: {
+    closed: "Birja yopiq",
+    earlyClose: "Qisqartirilgan kun, 13:00 ET da yopiladi",
+    fomcBegins: "FOMC yigʻilishi boshlanadi",
+    fomcStatement: "Bayonot 14:00 ET, Pauellning matbuot anjumani 14:30 ET",
+    cpi: "8:30 ET — isteʼmol narxlari indeksi",
+    ppi: "8:30 ET — ishlab chiqaruvchilar narxlari indeksi",
+    nfp: "8:30 ET — qishloq xoʻjaligidan tashqari bandlik (Non-Farm Payrolls)",
+    opex: "Oylik opsion ekspiratsiyasi — yopilishgacha hajm yuqori",
+    quad: "Indeks fyucherslari va opsionlari, aksiya fyucherslari va opsionlari muddati tugaydi",
+    monthEnd: "Institutsional rebalans oqimlari",
+  },
+} satisfies Messages<typeof ru>;

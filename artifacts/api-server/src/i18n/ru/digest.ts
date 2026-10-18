@@ -1,0 +1,23 @@
+/** Server `digest`: the morning / evening digest (Telegram Markdown + email HTML), rendered in the recipient's users.locale — lib/digest.ts. Tickers, setups, AI summaries and feed notes are data. «Edge Tracker» is a product name. */
+export default {
+  morning: "УТРЕННИЙ",
+  evening: "ВЕЧЕРНИЙ",
+  title: "{period} ДАЙДЖЕСТ",
+  brief: "УТРЕННИЙ БРИФ",
+  briefHtml: "Утренний бриф",
+  macro: "МАКРО",
+  macroHtml: "Макро",
+  sectors: "СЕКТОРЫ",
+  sectorsHtml: "Секторы",
+  feed: "ДНЕВНОЙ ФИД",
+  feedHtml: "Дневной фид",
+  theme: "Тема",
+  tickers: "Тикеры",
+  works: "Что работает",
+  notes: "Заметки",
+  trades: "ТРЕЙДЫ ЗА {hours}Ч",
+  tradesHtml: "Трейды за {hours}ч",
+  noTrades: "Трейдов за период не найдено",
+  grade: "Оценка",
+  subject: "Edge Tracker | Дайджест {date} — {trader}",
+} as const;

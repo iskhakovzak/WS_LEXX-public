@@ -1,0 +1,74 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreWorkspaces": [
+    "lib/api-spec"
+  ],
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/checks/*.mjs"
+      ],
+      "project": [
+        "scripts/checks/**/*.mjs"
+      ]
+    },
+    "artifacts/edge-tracker": {
+      "entry": [
+        "src/main.tsx",
+        "src/i18n/__typecheck__.ts",
+        "scripts/*.mjs"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx}",
+        "scripts/*.mjs"
+      ]
+    },
+    "artifacts/api-server": {
+      "entry": [
+        "src/index.ts",
+        "build.mjs",
+        "scripts/*.mjs",
+        "src/lib/propreports/__fixtures__/run-*.ts",
+        "src/db/tools/*.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "scripts/*.mjs"
+      ]
+    },
+    "scripts": {
+      "entry": [
+        "src/*.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "lib/*": {
+      "entry": [
+        "src/index.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ],
+      "ignore": [
+        "src/generated/**"
+      ],
+      "drizzle": false
+    }
+  },
+  "ignoreDependencies": [
+    "@replit/vite-plugin-cartographer",
+    "@replit/vite-plugin-dev-banner",
+    "tw-animate-css",
+    "@tailwindcss/typography",
+    "tailwindcss"
+  ],
+  "ignoreBinaries": [
+    "break",
+    "pg_dump",
+    "fuser",
+    "sleep",
+    "depcruise"
+  ]
+}

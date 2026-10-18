@@ -1,0 +1,1 @@
+Archived: merged into ../GLOSSARY.md (section «Risk desk (RISK & RULES agent, namespace `risk`)») at the end of the 2026-10-18 translation wave. Edit the terms there; for a new area add your section at the bottom of GLOSSARY.md.

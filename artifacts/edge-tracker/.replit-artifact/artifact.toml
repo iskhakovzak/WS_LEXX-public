@@ -1,0 +1,37 @@
+kind = "web"
+previewPath = "/"
+title = "Edge Tracker"
+version = "1.0.0"
+id = "artifacts/edge-tracker"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24402
+
+[services.development]
+run = "pnpm --filter @workspace/edge-tracker run dev"
+
+[services.production]
+serve = "static"
+publicDir = "artifacts/edge-tracker/dist/public"
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/edge-tracker", "run", "build"]
+
+[services.production.build.env]
+NODE_ENV = "production"
+BASE_PATH = "/"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24402"
+BASE_PATH = "/"

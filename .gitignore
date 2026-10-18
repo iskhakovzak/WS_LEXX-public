@@ -1,0 +1,92 @@
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# compiled output
+dist
+tmp
+out-tsc
+*.tsbuildinfo
+.expo
+.expo-shared
+
+# dependencies
+node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# Replit
+.cache/
+.local/
+
+# Temp files
+*.tar.gz
+*.zip
+*.sql.bak
+*.tmp
+
+# Local dev database
+.local-db/
+.env.local
+
+# Database dumps and local DB files — never commit (kept locally only)
+db-backup/
+db_backup_v3.sql
+accounts.db
+*.sql
+!lib/db/**/*.sql
+!artifacts/api-server/src/db/migrations/**/*.sql
+
+# Local tool/user state (Replit/VS Code server, agent worktrees, per-user configs)
+.config/
+.claude/worktrees/
+*.local.json
+
+# Dumps, backups and exported data — never in the repo or its working folder
+*.dump
+*.sql.gz
+*.backup
+*-backup*.json
+*.db
+.claude/launch.json
+local-logins.txt
+artifacts/api-server/dist-*/
+
+# Kept locally / in the private repo only
+.replit
+.replitignore
+replit.md
+threat_model.md
+MIGRATION.md
+local-logins.txt
+.claude/launch.json
+artifacts/api-server/dist-*/

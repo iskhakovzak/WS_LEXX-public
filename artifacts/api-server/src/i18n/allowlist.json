@@ -1,0 +1,17 @@
+{
+  "_comment": "i18n report allowlist (api-server). files: regexes on paths relative to artifacts/api-server; literals: regexes on the literal text. Only for Russian-input parsers, seed data and fixtures, never for user-facing text. A single line can also be skipped with an `i18n-ignore` comment (same or previous line).",
+  "files": [
+    "^src/lib/migrate\\.ts$",
+    "^src/lib/permissionsMatrix\\.ts$",
+    "^src/lib/academyCohortsDemo\\.ts$",
+    "^src/lib/academySeedCourse\\.ts$",
+    "^src/lib/propreports/__fixtures__/"
+  ],
+  "literals": [],
+  "_reasons": {
+    "^src/lib/permissionsMatrix\\.ts$": "server-a: RU source of capability label/description/group. The file is imported raw by scripts/check-permissions.mjs (Node type stripping, cannot import dictionaries) and mirrored by the frontend; EN/UZ in src/i18n/{en,uz}/permissions.ts via lib/permissionsI18n.ts.",
+    "^src/lib/academyCohortsDemo\\.ts$": "server-a: demo seed for cohorts (names of local members, sample cohort/session/goal texts written as a mentor would); rows become user content.",
+    "^src/lib/academySeedCourse\\.ts$": "server-a: demo course content (seed data written into academy_* tables, staff-editable user content afterwards).",
+    "^src/lib/propreports/__fixtures__/": "server-b: PropReports parser fixtures (sample trader names and report text as PropReports sends them)."
+  }
+}

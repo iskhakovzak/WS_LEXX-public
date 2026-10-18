@@ -1,0 +1,32 @@
+{
+  "name": "@workspace/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed-zakir-trades": "tsx ./src/seed-zakir-trades.ts",
+    "import-propreports": "tsx ./src/import-propreports.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "local-db": "tsx ./src/local-db.ts",
+    "local-whisper": "tsx ./src/local-whisper.ts",
+    "restore-dump": "tsx ./src/restore-dump.ts",
+    "seed-demo": "tsx ./src/seed-demo.ts",
+    "unseed-demo": "tsx ./src/seed-demo.ts --unseed",
+    "db-check": "tsx ./src/db-check.ts",
+    "create-test-db": "tsx ./src/create-test-db.ts"
+  },
+  "dependencies": {
+    "@workspace/db": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "^8.20.0",
+    "@types/pg-copy-streams": "^1.2.5",
+    "embedded-postgres": "16.14.0-beta.17",
+    "pg": "^8.20.0",
+    "pg-copy-streams": "^7.0.0",
+    "tsx": "catalog:"
+  }
+}

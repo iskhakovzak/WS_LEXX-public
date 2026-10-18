@@ -1,0 +1,43 @@
+import type { Messages } from "../core";
+import type ru from "../ru/calendar";
+
+export default {
+  name: {
+    newYear: "New Year's Day",
+    mlk: "MLK Day",
+    presidents: "Presidents Day",
+    goodFriday: "Good Friday",
+    memorial: "Memorial Day",
+    juneteenth: "Juneteenth",
+    juneteenthObserved: "Juneteenth (observed)",
+    independenceObserved: "Independence Day (observed)",
+    labor: "Labor Day",
+    thanksgiving: "Thanksgiving",
+    afterThanksgiving: "Day after Thanksgiving",
+    christmasEve: "Christmas Eve",
+    christmas: "Christmas Day",
+    christmasObserved: "Christmas Day (observed)",
+    fomc: "FOMC Meeting",
+    fomcDecision: "FOMC Meeting (Decision Day)",
+    fomcSep: "FOMC Meeting + SEP",
+    fomcSepDecision: "FOMC Meeting + SEP (Decision Day)",
+    cpi: "CPI Release",
+    ppi: "PPI Release",
+    nfp: "NFP Jobs Report",
+    opex: "Monthly OPEX",
+    quad: "Quadruple Witching",
+    monthEnd: "Month-End Rebalance",
+  },
+  desc: {
+    closed: "Market closed",
+    earlyClose: "Early close 1pm ET",
+    fomcBegins: "FOMC begins",
+    fomcStatement: "Statement 2pm ET, Powell presser 2:30pm ET",
+    cpi: "8:30am ET — Consumer Price Index",
+    ppi: "8:30am ET — Producer Price Index",
+    nfp: "8:30am ET — Non-Farm Payrolls",
+    opex: "Monthly options expiration — elevated volume into close",
+    quad: "Index futures, index options, stock futures, stock options all expire",
+    monthEnd: "Institutional rebalancing flows",
+  },
+} satisfies Messages<typeof ru>;

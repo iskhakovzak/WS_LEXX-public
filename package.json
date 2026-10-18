@@ -1,0 +1,41 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "build": "pnpm run typecheck && pnpm run build:packages",
+    "build:packages": "pnpm -r --if-present run build",
+    "build:prod": "bash scripts/build-prod.sh",
+    "start": "NODE_ENV=production node artifacts/api-server/dist/index.mjs",
+    "lint": "biome lint . && pnpm -r --if-present run lint",
+    "lint:ci": "biome ci --changed --since=origin/main --no-errors-on-unmatched --formatter-enabled=false --assist-enabled=false . && pnpm -r --if-present run lint",
+    "lint:dead": "knip --no-progress",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --if-present run typecheck",
+    "test": "pnpm -r --if-present run test",
+    "check:i18n": "node scripts/checks/check-i18n.mjs",
+    "check:ru-locale": "node scripts/checks/check-ru-locale.mjs",
+    "check:http-errors": "node artifacts/api-server/scripts/check-error-bodies.mjs",
+    "check:size": "node scripts/checks/check-size.mjs",
+    "check:lint": "node scripts/checks/check-lint.mjs",
+    "check:layers": "pnpm --filter @workspace/edge-tracker run check:layers",
+    "check:z": "pnpm --filter @workspace/edge-tracker run lint:z",
+    "check:perm": "node artifacts/api-server/scripts/check-permissions.mjs",
+    "checks": "pnpm run check:i18n && pnpm run check:ru-locale && pnpm run check:http-errors && pnpm run check:size && pnpm run check:lint && pnpm run check:layers && pnpm run check:z && pnpm run check:perm",
+    "checks:update": "pnpm run checks && node scripts/checks/check-i18n.mjs --update && node scripts/checks/check-ru-locale.mjs --update && node artifacts/api-server/scripts/check-error-bodies.mjs --update && node scripts/checks/check-size.mjs --update && node scripts/checks/check-lint.mjs --update && pnpm --filter @workspace/edge-tracker run check:layers:update && pnpm --filter @workspace/edge-tracker run lint:z -- --update",
+    "verify": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run checks && pnpm run build:packages",
+    "db:test:create": "pnpm --filter @workspace/scripts run create-test-db"
+  },
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "dependency-cruiser": "18.4.0",
+    "knip": "6.38.0",
+    "typescript": "~5.9.3"
+  },
+  "packageManager": "pnpm@10.34.7",
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

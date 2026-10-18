@@ -1,0 +1,49 @@
+{
+  "name": "@workspace/api-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "fuser -k \"${PORT:-8080}/tcp\" 2>/dev/null; sleep 1; for i in 1 2 3 4 5; do fuser \"${PORT:-8080}/tcp\" 2>/dev/null || break; sleep 1; done; export NODE_ENV=development && pnpm run build && pnpm run start",
+    "build": "node ./build.mjs",
+    "start": "node --enable-source-maps ./dist/index.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "i18n:report": "node scripts/i18n-report.mjs",
+    "db:snapshot": "node scripts/run-ts.mjs src/db/tools/snapshot.ts",
+    "db:snapshot:check": "node scripts/run-ts.mjs src/db/tools/snapshot.ts --check"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "7.22.0",
+    "@workspace/api-zod": "workspace:*",
+    "@workspace/db": "workspace:*",
+    "@workspace/integrations-anthropic-ai": "workspace:*",
+    "@workspace/text-search": "workspace:*",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "drizzle-orm": "catalog:",
+    "express": "5.2.1",
+    "express-rate-limit": "8.7.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "2.4.0",
+    "openai": "^6.35.0",
+    "pino": "^9.14.0",
+    "pino-http": "^10.5.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
+    "@types/node": "catalog:",
+    "esbuild": "0.27.3",
+    "esbuild-plugin-pino": "^2.3.3",
+    "pino-pretty": "^13.1.3",
+    "thread-stream": "3.1.0",
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,43 @@
+import type { Messages } from "../core";
+import type ru from "../ru/activity";
+
+export default {
+  title: {
+    trade_review: "tahlil #{reviewId}",
+    eod_day: "{date} kun yakunlari",
+    trade_restored: "{ticker} (tiklandi)",
+    trades_bulk: { one: "{count} ta savdo · ommaviy", other: "{count} ta savdo · ommaviy" },
+    earnings_import: { one: "Hisobotlar: {days} kunga {count} ta voqea", other: "Hisobotlar: {days} kunga {count} ta voqea" },
+    autolink: "Savdolarni avtomatik bogʻlash",
+    example: "Misol: {ticker}",
+    eod_reviewed: "{trader}, {date}",
+  },
+  details: {
+    autolinked: "Bogʻlangan savdolar: {count}",
+    folderMerged: "Papka birlashtirildi: \"{from}\" → \"{to}\"",
+    folderRenamed: "Papka qayta nomlandi: \"{from}\" → \"{to}\"",
+    folderDeleted: { one: "Papka oʻchirildi ({count} ta strategiya)", other: "Papka oʻchirildi ({count} ta strategiya)" },
+    createdOffice: "Ofis",
+    createdMine: "Meniki",
+    createdOfficeFolder: "Ofis · papka: {folder}",
+    createdMineFolder: "Meniki · papka: {folder}",
+    setupUpdated: "Setap yangilandi",
+    folder: "Papka: {folder}",
+    restored: "Savatdan tiklandi",
+    examplesAdded: "Namunalar (Tier {tier}): +{count}",
+    exampleRemoved: "Namuna olib tashlandi (savdo #{trade})",
+    copiedToMine: "#{id} dan «Meniki»ga nusxalandi",
+    proposedOffice: "Ofis pleybukiga taklif qilindi",
+    movedToOffice: "«Meniki»dan Ofisga koʻchirildi ({trader}), namunalar: {count}",
+    accessClosed: "Kirish yopildi",
+    accessAll: "Butun ofis uchun ochiq",
+    accessCustom: "Ochiq: {list}",
+    cohort: "guruh #{id}",
+    verdictApproved: "Setap maʼqullandi",
+    verdictNeedsWork: "Setap qayta ishlashga yuborildi",
+    verdictRetired: "Setap ishdan chiqarildi",
+    reviewed: "Setap tekshirilgan deb belgilandi",
+    unreviewed: "«Tekshirilgan» belgisi olib tashlandi",
+    eodNet: "{net} sof",
+  },
+} satisfies Messages<typeof ru>;

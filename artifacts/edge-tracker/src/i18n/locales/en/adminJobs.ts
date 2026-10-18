@@ -1,0 +1,46 @@
+import type { Messages } from "../../core";
+import type ru from "../ru/adminJobs";
+
+export default {
+  title: "Background jobs",
+  description: "Schedules use New York time. Every run is recorded; a second process never runs the same job.",
+  refresh: "Refresh the job list",
+  empty: "No job data",
+  unavailable: "The job list appears after the API restarts",
+  col: { job: "Job", schedule: "Schedule", last: "Last run", next: "Next", status: "Status" },
+  schedule: { onEvent: "after a PropReports sync", onStart: "at startup", manual: "manual" },
+  status: {
+    running: "Running",
+    ok: "Succeeded",
+    error: "Failed",
+    timeout: "Timed out",
+    skipped: "Skipped",
+    never: "Never run",
+    disabled: "Disabled",
+  },
+  failures24h: { one: "{count} failure in 24 h", other: "{count} failures in 24 h" },
+  duration: "{seconds} s",
+  run: "Run",
+  runAria: "Run the “{job}” job now",
+  started: "Job started",
+  startFailed: "Could not start the job",
+  names: {
+    market: { sectors: "Sector strength", "analyst-actions": "Analyst actions" },
+    digest: { morning: "Morning digest", evening: "Evening digest" },
+    psychology: { "weekly-report": "Weekly psychology report" },
+    quotes: { daily: "Quote of the day" },
+    db: { backup: "Database backup" },
+    academy: { challenges: "Academy challenges", readiness: "Promotion readiness" },
+    propreports: { sync: "PropReports sync" },
+    trades: { "structure-backfill": "Trade structure" },
+    jobs: { prune: "Job history cleanup" },
+    candles: { archive: "Candle archive", prune: "Candle cache cleanup" },
+    telegram: { "daily-morning": "Telegram: morning focus", "daily-evening": "Telegram: day card", "contract-alerts": "Telegram: contract stop alerts" },
+  },
+  backups: {
+    description: "pg_dump daily at 03:15 New York time (cache tables without data). 14 daily and 8 weekly copies are kept.",
+    empty: "No backups yet. The automatic backup runs daily at 03:15 New York time.",
+    emptyAdmin: "You can create one now: “Create now”.",
+    emptyHint: "If the list stays empty, check that a matching pg_dump is installed on the server.",
+  },
+} satisfies Messages<typeof ru>;

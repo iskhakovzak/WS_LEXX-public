@@ -1,0 +1,13 @@
+# gitleaks: default rules + an allowlist for local/CI test database URLs only.
+# Never allowlist a real token, password or key here — rotate it instead (ARCHITECTURE.md §6).
+title = "WS_LEXX"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Local and CI test Postgres DSNs (postgres:postgres on localhost)"
+regexTarget = "match"
+regexes = [
+  '''postgres(ql)?://postgres:postgres@(localhost|127\.0\.0\.1)(:\d+)?(/[A-Za-z0-9_]*)?''',
+]

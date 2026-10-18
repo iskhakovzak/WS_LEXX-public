@@ -1,0 +1,43 @@
+import type { Messages } from "../core";
+import type ru from "../ru/activity";
+
+export default {
+  title: {
+    trade_review: "review #{reviewId}",
+    eod_day: "Day results {date}",
+    trade_restored: "{ticker} (restored)",
+    trades_bulk: { one: "{count} trade · bulk", other: "{count} trades · bulk" },
+    earnings_import: { one: "Earnings: {count} event for {days} d.", other: "Earnings: {count} events for {days} d." },
+    autolink: "Trade auto-linking",
+    example: "Example: {ticker}",
+    eod_reviewed: "{trader}, {date}",
+  },
+  details: {
+    autolinked: "Trades linked: {count}",
+    folderMerged: "Folder merged: \"{from}\" → \"{to}\"",
+    folderRenamed: "Folder renamed: \"{from}\" → \"{to}\"",
+    folderDeleted: { one: "Folder deleted ({count} strategy)", other: "Folder deleted ({count} strategies)" },
+    createdOffice: "Office",
+    createdMine: "Mine",
+    createdOfficeFolder: "Office · folder: {folder}",
+    createdMineFolder: "Mine · folder: {folder}",
+    setupUpdated: "Setup updated",
+    folder: "Folder: {folder}",
+    restored: "Restored from trash",
+    examplesAdded: "Examples (Tier {tier}): +{count}",
+    exampleRemoved: "Example removed (trade #{trade})",
+    copiedToMine: "Copied to Mine from #{id}",
+    proposedOffice: "Proposed to the office playbook",
+    movedToOffice: "Moved to Office from Mine ({trader}), examples: {count}",
+    accessClosed: "Access closed",
+    accessAll: "Open to the whole office",
+    accessCustom: "Open to: {list}",
+    cohort: "cohort #{id}",
+    verdictApproved: "Setup approved",
+    verdictNeedsWork: "Setup sent back for rework",
+    verdictRetired: "Setup retired",
+    reviewed: "Setup marked as reviewed",
+    unreviewed: "“Reviewed” mark removed",
+    eodNet: "{net} net",
+  },
+} satisfies Messages<typeof ru>;

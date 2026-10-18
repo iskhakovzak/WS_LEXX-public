@@ -1,0 +1,28 @@
+{
+  "check": "check-lint",
+  "mode": "per-key",
+  "description": "lint findings per rule (Biome + ESLint); no rule may gain findings",
+  "metrics": {
+    "biome": {
+      "total": 260,
+      "byKey": {
+        "lint/a11y/useKeyWithClickEvents": 16,
+        "lint/a11y/useValidAriaRole": 1,
+        "lint/correctness/noUnusedVariables": 16,
+        "lint/correctness/useJsxKeyInIterable": 3,
+        "lint/nursery/noFloatingPromises": 218,
+        "lint/style/noRestrictedGlobals": 2,
+        "lint/suspicious/noConsole": 4
+      }
+    },
+    "eslint": {
+      "total": 91,
+      "byKey": {
+        "@tanstack/query/exhaustive-deps": 19,
+        "@tanstack/query/no-rest-destructuring": 8,
+        "@tanstack/query/no-unstable-deps": 5,
+        "react-hooks/exhaustive-deps": 59
+      }
+    }
+  }
+}

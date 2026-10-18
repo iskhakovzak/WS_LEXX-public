@@ -1,0 +1,130 @@
+/** Server `scaling`: scaling plan engine texts (metric labels / hints, notes, rule results, recommendation reasons) and scaling notifications. Tier names and rule labels typed by curators are user content. Terms: edge-tracker/src/i18n/GLOSSARY.md. */
+export default {
+  metric: {
+    trades: {
+      label: "Закрытых сделок",
+      hint: "Количество закрытых сделок в окне",
+    },
+    net_pnl: {
+      label: "P&L нетто",
+      hint: "Σ (pnl − комиссии) по закрытым сделкам; брокерские данные при наличии",
+    },
+    net_r: {
+      label: "Сумма R",
+      hint: "Σ signed R по закрытым сделкам",
+    },
+    profit_factor: {
+      label: "Profit factor",
+      hint: "Σ прибыль / |Σ убыток| ($ при наличии, иначе R); нет убытков ⇒ нет данных",
+    },
+    win_rate: {
+      label: "Win rate",
+      hint: "Прибыльные / (прибыльные + убыточные), BE не учитываются",
+    },
+    expectancy_r: {
+      label: "Ожидание, R",
+      hint: "Средний signed R на закрытую сделку",
+    },
+    green_weeks: {
+      label: "Зелёных недель подряд",
+      hint: "Подряд идущие недели с положительным нетто (текущая неполная неделя учитывается, только если она в плюсе)",
+    },
+    green_days_pct: {
+      label: "Доля зелёных дней",
+      hint: "Дни в плюсе / дни с закрытыми сделками",
+    },
+    max_dd_usd: {
+      label: "Макс. просадка, $",
+      hint: "Пик-впадина накопленного нетто P&L в окне (по дням)",
+    },
+    max_dd_pct: {
+      label: "Просадка, % от лимита",
+      hint: "Макс. просадка окна / лимит макс. просадки (из лимитов трейдера или тира)",
+    },
+    limit_breaches: {
+      label: "Нарушений лимитов",
+      hint: "Дни с убытком больше дневного лимита + недели больше недельного",
+    },
+    red_streak: {
+      label: "Красных дней подряд",
+      hint: "Текущая серия убыточных дней",
+    },
+    discipline: {
+      label: "Дисциплина (оценка)",
+      hint: "Средняя оценка «дисциплина» куратора за недели окна (1–10)",
+    },
+    rating_overall: {
+      label: "Общая оценка",
+      hint: "Средняя общая оценка куратора за недели окна (1–10)",
+    },
+    violations: {
+      label: "Нарушений правил и ошибок",
+      hint: "Записи rule_violations + trading_errors в окне",
+    },
+  },
+  unit: {
+    abs: "абсолютное значение",
+    x_daily_limit: "× дневной лимит убытка",
+    pct_account: "% от размера счёта",
+  },
+  note: {
+    noLimits: "лимиты не заданы",
+    broker: "по данным брокера",
+    journal: "по журналу",
+    noMoney: "нет данных по $",
+    noLosses: "нет убыточных сделок",
+    noTrades: "нет сделок",
+    byR: "по R",
+    byUsd: "по $",
+    noDdLimit: "лимит просадки не задан",
+    noRatings: "нет оценок куратора",
+    ratings: { one: "{count} оценка", few: "{count} оценки", many: "{count} оценок", other: "{count} оценки" },
+    noData: "нет данных",
+  },
+  rule: {
+    na: "{label}: порог не определён ({why})",
+    noDailyLimit: "нет дневного лимита",
+    noAccount: "нет размера счёта",
+    noValue: "{label}: {note}",
+    value: "{label}: {actual} (нужно {op} {threshold})",
+  },
+  reason: {
+    tierMissing: "Тир «{tier}» не найден в лестнице",
+    noTier: "Тир не назначен — начните с первой ступени",
+    noLowerTier: "Сработали правила понижения, но ниже тира нет — нужен разбор с куратором",
+    allMet: "Все {count} условий повышения выполнены",
+    topTier: "Все условия выполнены — это верхний тир",
+    noPromoteRules: "Нет активных правил повышения для этого тира",
+    missing: "Не выполнено {missing} из {total} условий повышения",
+    manual: "Ручное предложение куратора",
+    manualWith: "Ручное предложение куратора: {comment}",
+  },
+  action: {
+    promote: "Повышение",
+    demote: "Понижение",
+    assign: "Назначение",
+  },
+  noTier: "без тира",
+  assignDecision: "Тир назначен вручную",
+  notify: {
+    proposalTitle: "{trader}: {action} {from} → {to}",
+    proposalAuto: "Авто-предложение по правилам",
+    proposalBy: "Предложил {actor}",
+    withReasons: "{text}: {reasons}",
+    change: "{action} до «{tier}»",
+    approvedBody: "{change} одобрено ({actor})",
+    rejectedBody: "{change} отклонено ({actor})",
+    newLimits: ". Новые лимиты: {limits}",
+    quoteAfterApproved: ". «{comment}»",
+    quoteAfterRejected: ": «{comment}»",
+    approvedTitle: "Масштабирование одобрено",
+    rejectedTitle: "Масштабирование отклонено",
+    staffApproved: "{trader}: одобрено",
+    staffRejected: "{trader}: отклонено",
+    assignTitle: "Тир изменён: {from} → {to}",
+    assignBody: "{actor}: назначен тир «{tier}»",
+    limits: ". Лимиты: {limits}",
+  },
+  templateResync: "Лимиты приведены к шаблону тира",
+  templateDecision: "Тир назначен по шаблону",
+} as const;

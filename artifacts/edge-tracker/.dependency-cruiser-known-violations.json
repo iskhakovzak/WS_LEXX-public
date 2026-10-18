@@ -1,0 +1,1421 @@
+[
+  {
+    "type": "dependency",
+    "from": "src/hooks/use-trades-page.ts",
+    "to": "src/components/trades/review-presets.ts",
+    "unresolvedTo": "@/components/trades/review-presets",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "hooks-not-features"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/hooks/use-trades-page.ts",
+    "to": "src/components/trades/trade-utils.ts",
+    "unresolvedTo": "@/components/trades/trade-utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "hooks-not-features"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/lib/trade-result.ts",
+    "to": "src/components/ds.tsx",
+    "unresolvedTo": "@/components/ds",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "lib-is-framework-free"
+    }
+  },
+  {
+    "type": "cycle",
+    "from": "src/components/calculator/BlackScholes.tsx",
+    "to": "src/components/calculator/OptionsSection.tsx",
+    "unresolvedTo": "./OptionsSection",
+    "dependencyTypes": [
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/components/calculator/OptionsSection.tsx",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      },
+      {
+        "name": "src/components/calculator/BlackScholes.tsx",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/components/calculator/ChainAdvisor.tsx",
+    "to": "src/components/calculator/OptionsSection.tsx",
+    "unresolvedTo": "./OptionsSection",
+    "dependencyTypes": [
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/components/calculator/OptionsSection.tsx",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      },
+      {
+        "name": "src/components/calculator/ChainAdvisor.tsx",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/components/calculator/OptionsSection.tsx",
+    "to": "src/components/calculator/StrategyBuilder.tsx",
+    "unresolvedTo": "./StrategyBuilder",
+    "dependencyTypes": [
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/components/calculator/StrategyBuilder.tsx",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      },
+      {
+        "name": "src/components/calculator/BlackScholes.tsx",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/components/calculator/OptionsSection.tsx",
+        "dependencyTypes": [
+          "local",
+          "type-only",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/academy/content/progress-matrix.tsx",
+    "to": "src/components/analytics-page/metrics.ts",
+    "unresolvedTo": "@/components/analytics-page/metrics",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/admin/DataPanel.tsx",
+    "to": "src/components/propreports/api.ts",
+    "unresolvedTo": "@/components/propreports/api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/admin/PeoplePanel.tsx",
+    "to": "src/components/curator/curator-math.ts",
+    "unresolvedTo": "@/components/curator/curator-math",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/admin/RolesPanel.tsx",
+    "to": "src/components/settings/PermissionsSection.tsx",
+    "unresolvedTo": "@/components/settings/PermissionsSection",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/analyst/api.ts",
+    "to": "src/components/game-plan/types.ts",
+    "unresolvedTo": "@/components/game-plan/types",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/analytics-page/OverviewTab.tsx",
+    "to": "src/components/equity-chart/index.ts",
+    "unresolvedTo": "@/components/equity-chart",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/analytics/pro-equity.tsx",
+    "to": "src/components/equity-chart/index.ts",
+    "unresolvedTo": "@/components/equity-chart",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/behavior/behavior-charts.tsx",
+    "to": "src/components/stats/equity-panel.tsx",
+    "unresolvedTo": "@/components/stats/equity-panel",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/big7/DetailSheet.tsx",
+    "to": "src/components/watchlist/lib.ts",
+    "unresolvedTo": "@/components/watchlist/lib",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/big7/DetailSheet.tsx",
+    "to": "src/components/watchlist/use-quick-add.tsx",
+    "unresolvedTo": "@/components/watchlist/use-quick-add",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/calculator/ChainAdvisor.tsx",
+    "to": "src/components/settings/trading-defaults.ts",
+    "unresolvedTo": "@/components/settings/trading-defaults",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/curator/eod-review.tsx",
+    "to": "src/components/eod/eod-api.ts",
+    "unresolvedTo": "@/components/eod/eod-api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/curator/eod-review.tsx",
+    "to": "src/components/eod/EodReviewSheet.tsx",
+    "unresolvedTo": "@/components/eod/EodReviewSheet",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/curator/group-view.tsx",
+    "to": "src/components/admin/api.ts",
+    "unresolvedTo": "@/components/admin/api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/dashboard/equity-panel.tsx",
+    "to": "src/components/equity-chart/index.ts",
+    "unresolvedTo": "@/components/equity-chart",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/dashboard/team-heat-strip.tsx",
+    "to": "src/components/trades/sort-head.tsx",
+    "unresolvedTo": "@/components/trades/sort-head",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/day-report/sections.tsx",
+    "to": "src/components/weekly-review/api.ts",
+    "unresolvedTo": "@/components/weekly-review/api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/eod/eod-api.ts",
+    "to": "src/components/journal/use-journal-days.ts",
+    "unresolvedTo": "@/components/journal/use-journal-days",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/eod/EodDayReadOnly.tsx",
+    "to": "src/components/journal/DayJournalEditor.tsx",
+    "unresolvedTo": "@/components/journal/DayJournalEditor",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/eod/EodDayReadOnly.tsx",
+    "to": "src/components/journal/use-journal-days.ts",
+    "unresolvedTo": "@/components/journal/use-journal-days",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/eod/EodDayReadOnly.tsx",
+    "to": "src/components/journal/utils.ts",
+    "unresolvedTo": "@/components/journal/utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/eod/EodFlow.tsx",
+    "to": "src/components/journal/utils.ts",
+    "unresolvedTo": "@/components/journal/utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/eod/EodReviewSheet.tsx",
+    "to": "src/components/journal/use-journal-days.ts",
+    "unresolvedTo": "@/components/journal/use-journal-days",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/equity-chart/engine.ts",
+    "to": "src/components/equity-candles/lib.ts",
+    "unresolvedTo": "@/components/equity-candles/lib",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/equity-chart/EquityChart.tsx",
+    "to": "src/components/equity-candles/lib.ts",
+    "unresolvedTo": "@/components/equity-candles/lib",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/equity-chart/index.ts",
+    "to": "src/components/equity-candles/lib.ts",
+    "unresolvedTo": "@/components/equity-candles/lib",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "export"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/equity-chart/model.ts",
+    "to": "src/components/equity-candles/lib.ts",
+    "unresolvedTo": "@/components/equity-candles/lib",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/equity-chart/render.ts",
+    "to": "src/components/equity-candles/lib.ts",
+    "unresolvedTo": "@/components/equity-candles/lib",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/equity-chart/scale.ts",
+    "to": "src/components/equity-candles/lib.ts",
+    "unresolvedTo": "@/components/equity-candles/lib",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/equity-chart/tooltip.tsx",
+    "to": "src/components/equity-candles/lib.ts",
+    "unresolvedTo": "@/components/equity-candles/lib",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/events/catalyst-market.tsx",
+    "to": "src/components/research/earnings-history.tsx",
+    "unresolvedTo": "@/components/research/earnings-history",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/events/catalyst-market.tsx",
+    "to": "src/components/watchlist/use-quick-add.tsx",
+    "unresolvedTo": "@/components/watchlist/use-quick-add",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/events/catalyst-today.tsx",
+    "to": "src/components/research/earnings-history.tsx",
+    "unresolvedTo": "@/components/research/earnings-history",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/journal/DayJournalEditor.tsx",
+    "to": "src/components/day-report/api.ts",
+    "unresolvedTo": "@/components/day-report/api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/journal/DayJournalEditor.tsx",
+    "to": "src/components/eod/eod-api.ts",
+    "unresolvedTo": "@/components/eod/eod-api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/journal/DaySummary.tsx",
+    "to": "src/components/day-report/api.ts",
+    "unresolvedTo": "@/components/day-report/api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/journal/TeamDay.tsx",
+    "to": "src/components/eod/eod-api.ts",
+    "unresolvedTo": "@/components/eod/eod-api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/offerings/use-offerings-data.ts",
+    "to": "src/components/game-plan/plan-draft.ts",
+    "unresolvedTo": "@/components/game-plan/plan-draft",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/offerings/use-offerings-data.ts",
+    "to": "src/components/game-plan/types.ts",
+    "unresolvedTo": "@/components/game-plan/types",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/office-stats/line-canvas.tsx",
+    "to": "src/components/equity-chart/scale.ts",
+    "unresolvedTo": "@/components/equity-chart/scale",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/office-stats/team.tsx",
+    "to": "src/components/curator/curator-math.ts",
+    "unresolvedTo": "@/components/curator/curator-math",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/compare-dialog.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/examples-board.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/examples-section.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/folder-tree.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/home.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/linked-trades-section.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/media.ts",
+    "to": "src/components/game-plan/media.ts",
+    "unresolvedTo": "@/components/game-plan/media",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/setup-bits.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/setup-document.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/setup-form-dialog.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/setup-stats.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/setup-view.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/structured-editor.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/playbook/sub-setups-section.tsx",
+    "to": "src/components/playbook-sub/bits.tsx",
+    "unresolvedTo": "@/components/playbook-sub/bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/ratings/my-progress-tab.tsx",
+    "to": "src/components/ideas/hooks.ts",
+    "unresolvedTo": "@/components/ideas/hooks",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/replay/hooks.ts",
+    "to": "src/components/trades/trade-utils.ts",
+    "unresolvedTo": "@/components/trades/trade-utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "type-only",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/replay/QualityBlock.tsx",
+    "to": "src/components/trade-chart-parts/chart-utils.ts",
+    "unresolvedTo": "@/components/trade-chart-parts/chart-utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/settings/ProfileSection.tsx",
+    "to": "src/components/propreports/PerformanceReportPanel.tsx",
+    "unresolvedTo": "@/components/propreports/PerformanceReportPanel",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/shell/header-actions.tsx",
+    "to": "src/components/notifications/notification-bell.tsx",
+    "unresolvedTo": "@/components/notifications/notification-bell",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/shell/market-clock.tsx",
+    "to": "src/components/dashboard/market-session.ts",
+    "unresolvedTo": "@/components/dashboard/market-session",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/shell/use-shell-badges.ts",
+    "to": "src/components/curator/api.ts",
+    "unresolvedTo": "@/components/curator/api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/stats/breakdown-panel.tsx",
+    "to": "src/components/trades/trade-utils.ts",
+    "unresolvedTo": "@/components/trades/trade-utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/stats/equity-panel.tsx",
+    "to": "src/components/equity-chart/index.ts",
+    "unresolvedTo": "@/components/equity-chart",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/stats/trade-link-row.tsx",
+    "to": "src/components/trades/trade-utils.ts",
+    "unresolvedTo": "@/components/trades/trade-utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/trades/ExecutionsPanel.tsx",
+    "to": "src/components/trade-chart-parts/chart-utils.ts",
+    "unresolvedTo": "@/components/trade-chart-parts/chart-utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/trades/review-list.tsx",
+    "to": "src/components/replay/QualityBlock.tsx",
+    "unresolvedTo": "@/components/replay/QualityBlock",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/trades/review-presets.ts",
+    "to": "src/components/eod/eod-api.ts",
+    "unresolvedTo": "@/components/eod/eod-api",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/trades/TradeDetailSheet.tsx",
+    "to": "src/components/playbook/setup-bits.tsx",
+    "unresolvedTo": "@/components/playbook/setup-bits",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/trades/TradeDetailSheet.tsx",
+    "to": "src/components/replay/QualityBlock.tsx",
+    "unresolvedTo": "@/components/replay/QualityBlock",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/trades/TradeDetailSheet.tsx",
+    "to": "src/components/trade-chart-parts/chart-utils.ts",
+    "unresolvedTo": "@/components/trade-chart-parts/chart-utils",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/watchlist/WatchlistDetailSheet.tsx",
+    "to": "src/components/game-plan/types.ts",
+    "unresolvedTo": "@/components/game-plan/types",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/what-if/equity-chart.tsx",
+    "to": "src/components/analytics-page/metrics.ts",
+    "unresolvedTo": "@/components/analytics-page/metrics",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-feature-to-feature"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/components/ds/states.tsx",
+    "to": "src/components/query-error.tsx",
+    "unresolvedTo": "@/components/query-error",
+    "dependencyTypes": [
+      "aliased",
+      "aliased-tsconfig",
+      "aliased-tsconfig-paths",
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "ui-ds-only-lib"
+    }
+  }
+]

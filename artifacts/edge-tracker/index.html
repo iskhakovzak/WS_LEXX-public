@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#111214" />
+    <meta name="color-scheme" content="dark light" />
+    <title>WS_LEXX</title>
+    <script>
+      // Apply the saved theme before first paint to avoid a dark flash for light-theme users.
+      try {
+        var t = localStorage.getItem("ws_lexx_theme");
+        if (t === "sepia") t = "light";
+        var c = document.documentElement.classList;
+        if (t === "light") { c.remove("dark"); document.documentElement.style.colorScheme = "light"; }
+        else if (t === "dim") { c.add("dark", "dim"); }
+      } catch (e) {}
+    </script>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

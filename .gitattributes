@@ -1,0 +1,5 @@
+# Shell / Node scripts run via their shebang: a CRLF checkout (core.autocrlf=true on Windows) breaks the
+# #! line, e.g. edge-tracker z-scale.test.ts spawning scripts/check-z.mjs fails with "Invalid or unexpected token".
+*.sh  text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
